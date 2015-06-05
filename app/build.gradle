@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-archivesBaseName = 'RbmAndroidClient'
+archivesBaseName = 'rbmandroidclient'
+group = 'com.cellarlabs'
 version = '0.1.0'
 
 android {
