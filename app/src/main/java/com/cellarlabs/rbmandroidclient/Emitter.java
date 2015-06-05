@@ -19,10 +19,10 @@ import java.util.concurrent.ConcurrentMap;
  *
  *
  */
-public class RbmEmitter {
+public class Emitter {
 
-    private ConcurrentMap<String, ConcurrentLinkedQueue<RbmListener>> callbacks
-            = new ConcurrentHashMap<String, ConcurrentLinkedQueue<RbmListener>>();
+    private ConcurrentMap<String, ConcurrentLinkedQueue<Listener>> callbacks
+            = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Listener>>();
 
     /**
      * Listens on the event.
@@ -31,11 +31,11 @@ public class RbmEmitter {
      * @param fn
      * @return a reference to this object.
      */
-    public RbmEmitter on(String event, RbmListener fn) {
-        ConcurrentLinkedQueue<RbmListener> callbacks = this.callbacks.get(event);
+    public Emitter on(String event, Listener fn) {
+        ConcurrentLinkedQueue<Listener> callbacks = this.callbacks.get(event);
         if (callbacks == null) {
-            callbacks = new ConcurrentLinkedQueue<RbmListener>();
-            ConcurrentLinkedQueue<RbmListener> _callbacks = this.callbacks.putIfAbsent(event, callbacks);
+            callbacks = new ConcurrentLinkedQueue<Listener>();
+            ConcurrentLinkedQueue<Listener> _callbacks = this.callbacks.putIfAbsent(event, callbacks);
             if (_callbacks != null) {
                 callbacks = _callbacks;
             }
@@ -51,8 +51,8 @@ public class RbmEmitter {
      * @param fn
      * @return a reference to this object.
      */
-    public RbmEmitter once(final String event, final RbmListener fn) {
-        this.on(event, new OnceRbmListener(event, fn));
+    public Emitter once(final String event, final Listener fn) {
+        this.on(event, new OnceListener(event, fn));
         return this;
     }
 
@@ -61,7 +61,7 @@ public class RbmEmitter {
      *
      * @return a reference to this object.
      */
-    public RbmEmitter off() {
+    public Emitter off() {
         this.callbacks.clear();
         return this;
     }
@@ -72,7 +72,7 @@ public class RbmEmitter {
      * @param event an event name.
      * @return a reference to this object.
      */
-    public RbmEmitter off(String event) {
+    public Emitter off(String event) {
         this.callbacks.remove(event);
         return this;
     }
@@ -84,13 +84,13 @@ public class RbmEmitter {
      * @param fn
      * @return a reference to this object.
      */
-    public RbmEmitter off(String event, RbmListener fn) {
-        ConcurrentLinkedQueue<RbmListener> callbacks = this.callbacks.get(event);
+    public Emitter off(String event, Listener fn) {
+        ConcurrentLinkedQueue<Listener> callbacks = this.callbacks.get(event);
         if (callbacks != null) {
-            Iterator<RbmListener> it = callbacks.iterator();
+            Iterator<Listener> it = callbacks.iterator();
             while (it.hasNext()) {
-                RbmListener internal = it.next();
-                if (RbmEmitter.sameAs(fn, internal)) {
+                Listener internal = it.next();
+                if (Emitter.sameAs(fn, internal)) {
                     it.remove();
                     break;
                 }
@@ -105,18 +105,18 @@ public class RbmEmitter {
      * @param fn
      * @return a reference to this object.
      */
-    public RbmEmitter off(RbmListener fn) {
+    public Emitter off(Listener fn) {
         for (String event : this.callbacks.keySet()) {
             off(event, fn);
         }
         return this;
     }
 
-    private static boolean sameAs(RbmListener fn, RbmListener internal) {
+    private static boolean sameAs(Listener fn, Listener internal) {
         if (fn.equals(internal)) {
             return true;
-        } else if (internal instanceof OnceRbmListener) {
-            return fn.equals(((OnceRbmListener) internal).fn);
+        } else if (internal instanceof OnceListener) {
+            return fn.equals(((OnceListener) internal).fn);
         } else {
             return false;
         }
@@ -129,10 +129,10 @@ public class RbmEmitter {
      * @param {RBM_Request} req
      * @return a reference to this object.
      */
-    public RbmEmitter emit(String event, RbmRequest req) {
-        ConcurrentLinkedQueue<RbmListener> callbacks = this.callbacks.get(event);
+    public Emitter emit(String event, Request req) {
+        ConcurrentLinkedQueue<Listener> callbacks = this.callbacks.get(event);
         if (callbacks != null) {
-            for (RbmListener fn : callbacks) {
+            for (Listener fn : callbacks) {
                 fn.onResponse(req);
             }
         }
@@ -145,10 +145,10 @@ public class RbmEmitter {
      * @param event an event name.
      * @return a reference to this object.
      */
-    public List<RbmListener> listeners(String event) {
-        ConcurrentLinkedQueue<RbmListener> callbacks = this.callbacks.get(event);
+    public List<Listener> listeners(String event) {
+        ConcurrentLinkedQueue<Listener> callbacks = this.callbacks.get(event);
         return callbacks != null ?
-                new ArrayList<RbmListener>(callbacks) : new ArrayList<RbmListener>(0);
+                new ArrayList<Listener>(callbacks) : new ArrayList<Listener>(0);
     }
 
     /**
@@ -158,26 +158,26 @@ public class RbmEmitter {
      * @return a reference to this object.
      */
     public boolean hasListeners(String event) {
-        ConcurrentLinkedQueue<RbmListener> callbacks = this.callbacks.get(event);
+        ConcurrentLinkedQueue<Listener> callbacks = this.callbacks.get(event);
         return callbacks != null && !callbacks.isEmpty();
     }
 
     /**
      * Private class for listening to an event only once
      */
-    private class OnceRbmListener extends RbmListener {
+    private class OnceListener extends Listener {
 
         public final String event;
-        public final RbmListener fn;
+        public final Listener fn;
 
-        public OnceRbmListener(String event, RbmListener fn) {
+        public OnceListener(String event, Listener fn) {
             this.event = event;
             this.fn = fn;
         }
 
         @Override
-        public void onResponse(RbmRequest req) {
-            RbmEmitter.this.off(this.event, this);
+        public void onResponse(Request req) {
+            Emitter.this.off(this.event, this);
             this.fn.onResponse(req);
         }
     }

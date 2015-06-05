@@ -1,6 +1,5 @@
 package com.cellarlabs.rbmandroidclient;
 
-import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.Socket;
 
 import java.net.URISyntaxException;
@@ -12,14 +11,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by vhanssen on 02/06/15.
  */
 public class RbmAndroidClient {
-    private final RbmEmitter emitter = new RbmEmitter();
+    private final Emitter emitter = new Emitter();
     Socket socket = null;
     private AtomicInteger nextreqid = new AtomicInteger(1);
     private AtomicInteger nexttagid = new AtomicInteger(1);
     private static final int MAXREQID = 64000;
     private static final int MAXTAGID = 64000;
 
-    HashMap<Integer,ArrayList<RbmListener>> tags = new HashMap<>();
+    HashMap<Integer,ArrayList<Listener>> tags = new HashMap<>();
 
     public RbmAndroidClient(String server) {
         try {
@@ -32,16 +31,16 @@ public class RbmAndroidClient {
     protected void init(String server) throws URISyntaxException {
         socket = new Socket(server);
         final RbmAndroidClient self = this;
-        socket.on(Socket.EVENT_OPEN, new Emitter.Listener() {
+        socket.on(Socket.EVENT_OPEN, new com.github.nkzawa.emitter.Emitter.Listener() {
             @Override
             public void call(Object... args) {
 
             }
         });
-        socket.on(Socket.EVENT_MESSAGE, new Emitter.Listener() {
+        socket.on(Socket.EVENT_MESSAGE, new com.github.nkzawa.emitter.Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                RbmRequest req = new RbmRequest((String) args[0]);
+                Request req = new Request((String) args[0]);
                 if (req.hasReqid()) {
                     emitter.emit("_:"+req.getReqid(), req);
                 } else {
@@ -52,15 +51,15 @@ public class RbmAndroidClient {
         socket.open();
     }
 
-    public void on(String command, final RbmListener fn) {
+    public void on(String command, final Listener fn) {
         emitter.on(command, fn);
     }
 
-    public void once(String command, final RbmListener fn) {
+    public void once(String command, final Listener fn) {
         emitter.once(command, fn);
     }
 
-    public void on(String command, Integer tag, final RbmListener fn) {
+    public void on(String command, Integer tag, final Listener fn) {
         emitter.on(command, fn);
     }
 
@@ -73,11 +72,11 @@ public class RbmAndroidClient {
         return id;
     }
 
-    public void send(RbmRequest req) {
+    public void send(Request req) {
         socket.send(req.data());
     }
 
-    public void send(RbmRequest req, final RbmListener fn) {
+    public void send(Request req, final Listener fn) {
         if (fn!=null) {
             int id = getNextUniqueId();
             req.setReqid(id);
@@ -97,7 +96,7 @@ public class RbmAndroidClient {
             id = nexttagid.getAndIncrement();
         } while(tags.containsKey(id));
 
-        ArrayList<RbmListener> list = new ArrayList<RbmListener>();
+        ArrayList<Listener> list = new ArrayList<Listener>();
         tags.put(id, list);
         return id;
     }
@@ -109,7 +108,7 @@ public class RbmAndroidClient {
      * @param tag
      */
     public void cancelCallbacks(Integer tag) {
-        for(RbmListener fn: tags.get(tag)) {
+        for(Listener fn: tags.get(tag)) {
             emitter.off(fn);
         }
         tags.remove(tag);

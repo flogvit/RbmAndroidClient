@@ -3,13 +3,13 @@ package com.cellarlabs.rbmandroidclient;
 /**
  * Created by vhanssen on 02/06/15.
  */
-public class RbmListener {
+public class Listener {
     private Integer tag = 0;
-    public RbmListener() {
+    public Listener() {
 
     }
 
-    public RbmListener(final Integer tag) {
+    public Listener(final Integer tag) {
         this.tag = tag;
     }
 
@@ -17,5 +17,5 @@ public class RbmListener {
         return this.tag;
     }
 
-    public void onResponse(RbmRequest req) {};
+    public void onResponse(Request req) {};
 }

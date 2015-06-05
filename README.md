@@ -53,8 +53,8 @@ Sending a message is done this way
 
 ```java
 
-RbmRequest req = new RbmRequest().setCommand("your.command");
-rbmClient.send(req);
+Request req = new Request().setCommand("your.command");
+RbmClient.send(req);
 
 ```
 
@@ -62,9 +62,9 @@ You can get the response in two ways
 
 ```java
 
-rbmClient.on("your.command", new RbmListener(RBM_TAG) {
+rbmClient.on("your.command", new Listener(RBM_TAG) {
     @Override
-    onResponse(RbmRequest req) {
+    onResponse(Request req) {
        // Do your thing with req
     }
 });
@@ -75,10 +75,10 @@ or send it with a callback
 
 ```java
 
-RbmRequest req = new RbmRequest().setCommand("your.command");
-rbmClient.send(req, new RbmListener(RBM_TAG) {
+Request req = new Request().setCommand("your.command");
+rbmClient.send(req, new Listener(RBM_TAG) {
    @Override
-   onResponse(RbmRequest req) {
+   onResponse(Request req) {
       // Do your thing with req
    }
 });

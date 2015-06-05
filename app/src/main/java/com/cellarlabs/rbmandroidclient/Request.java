@@ -8,27 +8,26 @@ import java.util.HashMap;
 /**
  * Created by vhanssen on 02/06/15.
  */
-public class RbmRequest {
+public class Request {
     private String command = "";
     private Integer reqid = 0;
     private JSONObject json = null;
 
-    public RbmRequest() {
+    public Request() {
 
     }
 
-    public RbmRequest(String data) {
+    public Request(String data) {
         try {
             json = new JSONObject(data);
             this.command = json.has("command") ? json.getString("command") : "";
             this.reqid = json.has("reqid") ? json.getInt("reqid") : 0;
-            System.out.println(json.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public RbmRequest setCommand(String command) {
+    public Request setCommand(String command) {
         this.command = command;
         return this;
     }
@@ -37,7 +36,7 @@ public class RbmRequest {
         return this.command;
     }
 
-    public RbmRequest setParams(String params) {
+    public Request setParams(String params) {
 
         return this;
     }
@@ -56,17 +55,17 @@ public class RbmRequest {
         return Integer.parseInt(get(key));
     }
 
-    public RbmRequest addPopulate(RbmRequest req, HashMap<String,String> map) {
+    public Request addPopulate(Request req, HashMap<String, String> map) {
 
 
         return this;
     }
 
     public boolean hasReqid() {
-        return this.reqid>0;
+        return this.reqid > 0;
     }
 
-    public RbmRequest setReqid(int id) {
+    public Request setReqid(int id) {
         this.reqid = id;
         return this;
     }
@@ -80,10 +79,8 @@ public class RbmRequest {
         try {
             object.put("command", this.command);
             JSONObject params = new JSONObject();
-            params.put("a", 2);
-            params.put("b", 3);
             object.put("params", params);
-            if (this.reqid>0)
+            if (this.reqid > 0)
                 object.put("reqid", this.reqid);
         } catch (JSONException e) {
             e.printStackTrace();
