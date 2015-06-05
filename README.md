@@ -27,26 +27,26 @@ RbmAndroidClient rbmClient = new RbmAndroidClient("ws://<server>:<port>");
 
 Setup must be done in all activities. If you register any listeners, you need to use the RBM_TAG.
 It should be unique for each Activity, and must be canceled when it stops, or else the
-garbagde collector will not release the Activity
+garbage collector will not release the Activity
 
 ```java
 
-    private Integer RBM_TAG = 0;
+private Integer RBM_TAG = 0;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        RBM_TAG = rbmClient.getUniqueTag();
-        // ...
-    }
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    RBM_TAG = rbmClient.getUniqueTag();
+    // ...
+}
 
-    @Override
-    protected void onStop () {
-        super.onStop();
-        if (rbmClient != null) {
-            rbmClient.cancelCallbacks(RBM_TAG);
-        }
+@Override
+protected void onStop () {
+    super.onStop();
+    if (rbmClient != null) {
+        rbmClient.cancelCallbacks(RBM_TAG);
     }
+}
 ```
 
 Sending a message is done this way
@@ -71,7 +71,7 @@ rbmClient.on("your.command", new RbmListener(RBM_TAG) {
 
 ```
 
-or send it will a callback
+or send it with a callback
 
 ```java
 
