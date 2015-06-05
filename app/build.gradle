@@ -30,6 +30,6 @@ dependencies {
 
 uploadArchives {
     repositories.mavenDeployer {
-        repository(url: "file:///Users/vhanssen/tmp/maven/")
+        repository(url: "file:release/")
     }
 }
