@@ -17,6 +17,8 @@ public class Request {
     private JSONObject json = null;
     private String version = "";
     private JSONObject params = new JSONObject();
+    private Integer errorId = 0;
+    private String errorText = "";
 
     public Request() {
 
@@ -29,6 +31,8 @@ public class Request {
             this.reqid = json.has("reqid") ? json.getInt("reqid") : 0;
             this.version = json.has("version") ? json.getString("version") : "";
             this.params = json.has("params") ? json.getJSONObject("params") : new JSONObject();
+            this.errorId = json.has("errorId") ? json.getInt("errorId") : 0;
+            this.errorText = json.has("errorText") ? json.getString("errorText") : "";
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -137,5 +141,17 @@ public class Request {
 
     public boolean hasVersion() {
         return !this.version.equals("");
+    }
+
+    public boolean isError() {
+        return errorId>0;
+    }
+
+    public Integer getErrorId() {
+        return this.errorId;
+    }
+
+    public String getErrorText() {
+        return this.errorText;
     }
 }
