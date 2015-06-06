@@ -85,3 +85,19 @@ rbmClient.send(req, new Listener(RBM_TAG) {
 });
 
 ```
+
+Example of using populate to execute sub commands and use the results
+
+```java
+Request req = new Request().setCommand("math.add")
+    .addPopulate(
+        new Populate().
+            addRequest(new Request().setCommand("number.get").addParam("number", 2)).
+            addMapping("a", "number")
+    ).addPopulate(
+        new Populate().
+            addRequest(new Request().setCommand("number.get").addParam("number", 3)).
+            addMapping("b", "number")
+    );
+
+```

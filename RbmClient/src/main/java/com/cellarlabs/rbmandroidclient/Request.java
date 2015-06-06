@@ -2,11 +2,14 @@ package com.cellarlabs.rbmandroidclient;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 /**
  * Created by vhanssen on 02/06/15.
@@ -19,6 +22,7 @@ public class Request {
     private JSONObject params = new JSONObject();
     private Integer errorId = 0;
     private String errorText = "";
+    private ArrayList<Populate> populate = null;
 
     public Request() {
 
@@ -27,12 +31,12 @@ public class Request {
     public Request(String data) {
         try {
             json = new JSONObject(data);
-            this.command = json.has("command") ? json.getString("command") : "";
-            this.reqid = json.has("reqid") ? json.getInt("reqid") : 0;
-            this.version = json.has("version") ? json.getString("version") : "";
-            this.params = json.has("params") ? json.getJSONObject("params") : new JSONObject();
-            this.errorId = json.has("errorId") ? json.getInt("errorId") : 0;
-            this.errorText = json.has("errorText") ? json.getString("errorText") : "";
+            this.command = json.has("command") ? json.getString("command") : this.command;
+            this.reqid = json.has("reqid") ? json.getInt("reqid") : this.reqid;
+            this.version = json.has("version") ? json.getString("version") : this.version;
+            this.params = json.has("params") ? json.getJSONObject("params") : this.params;
+            this.errorId = json.has("errorId") ? json.getInt("errorId") : this.errorId;
+            this.errorText = json.has("errorText") ? json.getString("errorText") : this.errorText;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -97,7 +101,17 @@ public class Request {
     }
 
     public Request addPopulate(Request req, HashMap<String, String> map) {
+        if (populate==null)
+            populate = new ArrayList<>();
+        populate.add(new Populate(req, map));
 
+        return this;
+    }
+
+    public Request addPopulate(Populate populate) {
+        if (this.populate==null)
+            this.populate = new ArrayList<>();
+        this.populate.add(populate);
 
         return this;
     }
@@ -115,7 +129,7 @@ public class Request {
         return this.reqid;
     }
 
-    public String data() {
+    protected JSONObject dataCore() {
         JSONObject object = new JSONObject();
         try {
             object.put("command", this.command);
@@ -124,10 +138,16 @@ public class Request {
                 object.put("reqid", this.reqid);
             if (hasVersion())
                 object.put("version", this.version);
+            if (hasPopulate())
+                buildPopulate(object);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return object.toString();
+        return object;
+    }
+
+    public String data() {
+        return dataCore().toString();
     }
 
     public String getVersion() {
@@ -153,5 +173,24 @@ public class Request {
 
     public String getErrorText() {
         return this.errorText;
+    }
+
+    protected boolean hasPopulate() {
+        return this.populate!=null;
+    }
+
+    protected void buildPopulate(JSONObject obj) {
+        JSONArray build = new JSONArray();
+        try {
+            for(Populate pop: this.populate) {
+                JSONObject entry = new JSONObject();
+                entry.put("request", pop.getRequest().dataCore());
+                entry.put("returns", pop.getMap());
+                build.put(entry);
+            }
+            obj.put("populate", build);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
