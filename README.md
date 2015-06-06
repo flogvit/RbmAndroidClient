@@ -58,7 +58,8 @@ RbmClient.send(req);
 
 ```
 
-You can get the response in two ways
+You can get the response in two ways. The first way will
+catch all responses to the "your.command" requests
 
 ```java
 
@@ -71,7 +72,7 @@ rbmClient.on("your.command", new Listener(RBM_TAG) {
 
 ```
 
-or send it with a callback
+The second will only catch the response to the one you just sent
 
 ```java
 

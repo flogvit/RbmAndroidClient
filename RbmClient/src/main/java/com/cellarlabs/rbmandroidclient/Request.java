@@ -1,9 +1,12 @@
 package com.cellarlabs.rbmandroidclient;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Created by vhanssen on 02/06/15.
@@ -12,6 +15,8 @@ public class Request {
     private String command = "";
     private Integer reqid = 0;
     private JSONObject json = null;
+    private String version = "";
+    private JSONObject params = new JSONObject();
 
     public Request() {
 
@@ -22,6 +27,8 @@ public class Request {
             json = new JSONObject(data);
             this.command = json.has("command") ? json.getString("command") : "";
             this.reqid = json.has("reqid") ? json.getInt("reqid") : 0;
+            this.version = json.has("version") ? json.getString("version") : "";
+            this.params = json.has("params") ? json.getJSONObject("params") : new JSONObject();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -36,15 +43,45 @@ public class Request {
         return this.command;
     }
 
-    public Request setParams(String params) {
-
+    public Request setParams(String json) {
+        try {
+            params = new JSONObject(json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return this;
+    }
+
+    public Request addParam(String key, String value) {
+        try {
+            params.put(key, value);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    public Request addParams(JSONObject json) {
+        Iterator it = json.keys();
+        while(it.hasNext()) {
+            String key = (String) it.next();
+            try {
+                params.put(key, json.get(key));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return this;
+    }
+
+    public Request addParam(String key, Integer value) {
+        return addParam(key, ""+value);
     }
 
     public String get(String key) {
         String result = "";
         try {
-            result = json.getJSONObject("params").getString(key);
+            result = params.getString(key);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -78,13 +115,27 @@ public class Request {
         JSONObject object = new JSONObject();
         try {
             object.put("command", this.command);
-            JSONObject params = new JSONObject();
             object.put("params", params);
-            if (this.reqid > 0)
+            if (hasReqid())
                 object.put("reqid", this.reqid);
+            if (hasVersion())
+                object.put("version", this.version);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return object.toString();
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public Request setVersion(String version) {
+        this.version = version;
+        return this;
+    }
+
+    public boolean hasVersion() {
+        return !this.version.equals("");
     }
 }
