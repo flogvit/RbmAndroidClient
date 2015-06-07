@@ -111,3 +111,14 @@ Example of using populate to execute sub commands and use the results
                 );
 
 ```
+
+or a bit more compact
+
+```java
+Request req = new Request()
+   .withCommand("math.add")
+   .withParam(new Param().set(new Request().withCommand("number.get").withParam("number", 2))
+        .addMapping("number", "a"))
+   .withParam(new Param().set(new Request().withCommand("number.get").withParam("number", 3))
+        .addMapping("number", "b"));
+``
