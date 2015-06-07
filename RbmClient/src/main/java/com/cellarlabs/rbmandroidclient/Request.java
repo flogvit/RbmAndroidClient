@@ -19,10 +19,9 @@ public class Request {
     private Integer reqid = 0;
     private JSONObject json = null;
     private String version = "";
-    private JSONObject params = new JSONObject();
+    private ArrayList<Param> params = new ArrayList<>();
     private Integer errorId = 0;
     private String errorText = "";
-    private ArrayList<Populate> populate = null;
 
     public Request() {
 
@@ -34,7 +33,8 @@ public class Request {
             this.command = json.has("command") ? json.getString("command") : this.command;
             this.reqid = json.has("reqid") ? json.getInt("reqid") : this.reqid;
             this.version = json.has("version") ? json.getString("version") : this.version;
-            this.params = json.has("params") ? json.getJSONObject("params") : this.params;
+            if (json.has("params"))
+                parseParams(json.getJSONObject("params"));
             this.errorId = json.has("errorId") ? json.getInt("errorId") : this.errorId;
             this.errorText = json.has("errorText") ? json.getString("errorText") : this.errorText;
         } catch (Exception e) {
@@ -42,7 +42,7 @@ public class Request {
         }
     }
 
-    public Request setCommand(String command) {
+    public Request withCommand(String command) {
         this.command = command;
         return this;
     }
@@ -51,69 +51,29 @@ public class Request {
         return this.command;
     }
 
-    public Request setParams(String json) {
-        try {
-            params = new JSONObject(json);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public Request withParam(Param param) {
+        params.add(param);
         return this;
     }
 
-    public Request addParam(String key, String value) {
-        try {
-            params.put(key, value);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return this;
+    public Request withParam(String key, String value) {
+        return withParam(new Param().set(key, value));
     }
 
-    public Request addParams(JSONObject json) {
-        Iterator it = json.keys();
-        while(it.hasNext()) {
-            String key = (String) it.next();
-            try {
-                params.put(key, json.get(key));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        return this;
-    }
-
-    public Request addParam(String key, Integer value) {
-        return addParam(key, ""+value);
+    public Request withParam(String key, Integer value) {
+        return withParam(key, ""+value);
     }
 
     public String get(String key) {
-        String result = "";
-        try {
-            result = params.getString(key);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        for(Param param: params) {
+            if (param.is(key))
+                return param.getValue();
         }
-        return result;
+        return null;
     }
 
     public Integer getInteger(String key) {
         return Integer.parseInt(get(key));
-    }
-
-    public Request addPopulate(Request req, HashMap<String, String> map) {
-        if (populate==null)
-            populate = new ArrayList<>();
-        populate.add(new Populate(req, map));
-
-        return this;
-    }
-
-    public Request addPopulate(Populate populate) {
-        if (this.populate==null)
-            this.populate = new ArrayList<>();
-        this.populate.add(populate);
-
-        return this;
     }
 
     public boolean hasReqid() {
@@ -133,13 +93,11 @@ public class Request {
         JSONObject object = new JSONObject();
         try {
             object.put("command", this.command);
-            object.put("params", params);
+            buildParams(object);
             if (hasReqid())
                 object.put("reqid", this.reqid);
             if (hasVersion())
                 object.put("version", this.version);
-            if (hasPopulate())
-                buildPopulate(object);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -175,22 +133,49 @@ public class Request {
         return this.errorText;
     }
 
-    protected boolean hasPopulate() {
-        return this.populate!=null;
-    }
+    protected void buildParams(JSONObject obj) {
+        JSONObject jsonparams = new JSONObject();
+        JSONArray populate = null;
 
-    protected void buildPopulate(JSONObject obj) {
-        JSONArray build = new JSONArray();
         try {
-            for(Populate pop: this.populate) {
-                JSONObject entry = new JSONObject();
-                entry.put("request", pop.getRequest().dataCore());
-                entry.put("returns", pop.getMap());
-                build.put(entry);
+            for(Param param: this.params) {
+                if (param.isRequest()) {
+                    JSONObject entry = new JSONObject();
+                    entry.put("request", param.getRequest().dataCore());
+                    entry.put("returns", param.getMap());
+                    if (populate==null)
+                        populate = new JSONArray();
+                    populate.put(entry);
+                } else {
+                    jsonparams.put(param.getKey(), param.getValue());
+                }
             }
-            obj.put("populate", build);
+            if (populate!=null)
+                obj.put("populate", populate);
+            obj.put("params", jsonparams);
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Parse the incoming params
+     *
+     * TODO: Need to implement arrays etc later on
+     * @param obj
+     */
+    protected void parseParams(JSONObject obj) {
+        this.params = new ArrayList<>();
+        Iterator<?> keys = obj.keys();
+
+        while( keys.hasNext() ) {
+            String key = (String)keys.next();
+            try {
+                Param param = new Param().set(key, obj.getString(key));
+                params.add(param);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
