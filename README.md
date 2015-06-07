@@ -13,7 +13,7 @@ repositories {
 dependencies {
 //    ..
     compile 'com.github.nkzawa:engine.io-client:0.5.0'
-    compile 'com.cellarlabs:rbmandroidclient:0.1.0@aar'
+    compile 'com.cellarlabs:rbmandroidclient:0.1.3@aar'
 }
 ```
 
@@ -53,7 +53,7 @@ Sending a message is done this way
 
 ```java
 
-Request req = new Request().setCommand("your.command");
+Request req = new Request().withCommand("your.command");
 RbmClient.send(req);
 
 ```
@@ -76,7 +76,7 @@ The second will only catch the response to the one you just sent
 
 ```java
 
-Request req = new Request().setCommand("your.command");
+Request req = new Request().withCommand("your.command");
 rbmClient.send(req, new Listener(RBM_TAG) {
    @Override
    onResponse(Request req) {
