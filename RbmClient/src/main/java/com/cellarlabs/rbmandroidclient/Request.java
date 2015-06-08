@@ -75,16 +75,23 @@ public class Request {
         return withParam(new Param().set(key, value));
     }
 
-    public String get(String key) {
+    public Param get(String key) {
         for(Param param: params) {
             if (param.is(key))
-                return param.getValue();
+                return param;
         }
         return null;
     }
 
+    public String getString(String key) {
+        Param param = get(key);
+        if (param==null)
+            return null;
+        return param.getValue();
+    }
+
     public int getInteger(String key) {
-        return Integer.parseInt(get(key));
+        return Integer.parseInt(getString(key));
     }
 
     public boolean hasReqid() {
