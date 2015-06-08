@@ -1,5 +1,6 @@
 package com.cellarlabs.rbmandroidclient;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,6 +12,9 @@ import java.util.HashMap;
 public class Param {
     private String key = "";
     private String value = "";
+    private JSONArray valueArray = null;
+    private JSONObject valueObject = null;
+
     private Request req = null;
     private HashMap<String,String> paramMap = null;
 
@@ -41,6 +45,25 @@ public class Param {
     public Param set(String key, String value) {
         this.key = key;
         this.value = value;
+        this.valueArray = null;
+        this.valueObject = null;
+        return this;
+    }
+
+    public Param set(String key, JSONObject value) {
+        this.valueObject = value;
+        this.value = "";
+        this.valueArray = null;
+        this.key = key;
+        return this;
+    }
+
+    public Param set(String key, JSONArray value) {
+        this.valueArray = value;
+        this.valueObject = null;
+        this.value = "";
+        this.key = key;
+
         return this;
     }
 
@@ -52,12 +75,28 @@ public class Param {
         return this.req!=null;
     }
 
+    public boolean isValueObject() {
+        return this.valueObject!=null;
+    }
+
+    public boolean isValueArray() {
+        return this.valueArray!=null;
+    }
+
     public String getKey() {
         return this.key;
     }
 
     public String getValue() {
         return this.value;
+    }
+
+    public JSONObject getValueObject() {
+        return this.valueObject;
+    }
+
+    public JSONArray getValueArray() {
+        return this.valueArray;
     }
 
     public String get(String key) {

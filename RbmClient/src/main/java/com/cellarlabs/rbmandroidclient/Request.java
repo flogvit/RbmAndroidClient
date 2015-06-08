@@ -7,20 +7,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 
 /**
  * Created by vhanssen on 02/06/15.
  */
 public class Request {
     private String command = "";
-    private Integer reqid = 0;
+    private int reqid = 0;
     private JSONObject json = null;
     private String version = "";
     private ArrayList<Param> params = new ArrayList<>();
-    private Integer errorId = 0;
+    private int errorId = 0;
     private String errorText = "";
 
     public Request() {
@@ -51,6 +49,11 @@ public class Request {
         return this.command;
     }
 
+    public Request withVersion(String version) {
+        this.version = version;
+        return this;
+    }
+
     public Request withParam(Param param) {
         params.add(param);
         return this;
@@ -60,7 +63,7 @@ public class Request {
         return withParam(new Param().set(key, value));
     }
 
-    public Request withParam(String key, Integer value) {
+    public Request withParam(String key, int value) {
         return withParam(key, ""+value);
     }
 
@@ -72,7 +75,7 @@ public class Request {
         return null;
     }
 
-    public Integer getInteger(String key) {
+    public int getInteger(String key) {
         return Integer.parseInt(get(key));
     }
 
@@ -112,11 +115,6 @@ public class Request {
         return version;
     }
 
-    public Request setVersion(String version) {
-        this.version = version;
-        return this;
-    }
-
     public boolean hasVersion() {
         return !this.version.equals("");
     }
@@ -125,7 +123,7 @@ public class Request {
         return errorId>0;
     }
 
-    public Integer getErrorId() {
+    public int getErrorId() {
         return this.errorId;
     }
 
@@ -147,7 +145,12 @@ public class Request {
                         populate = new JSONArray();
                     populate.put(entry);
                 } else {
-                    jsonparams.put(param.getKey(), param.getValue());
+                    if (param.isValueArray())
+                        jsonparams.put(param.getKey(), param.getValueArray());
+                    else if (param.isValueObject())
+                        jsonparams.put(param.getKey(), param.getValueObject());
+                    else
+                        jsonparams.put(param.getKey(), param.getValue());
                 }
             }
             if (populate!=null)

@@ -107,7 +107,7 @@ public class RbmAndroidClient {
      * This should always be called in the onStop() method of an Activity
      * @param tag
      */
-    public void cancelCallbacks(Integer tag) {
+    public void cancelCallbacks(int tag) {
         for(Listener fn: tags.get(tag)) {
             emitter.off(fn);
         }
