@@ -67,6 +67,14 @@ public class Request {
         return withParam(key, ""+value);
     }
 
+    public Request withParam(String key, JSONArray value) {
+        return withParam(new Param().set(key, value));
+    }
+
+    public Request withParam(String key, JSONObject value) {
+        return withParam(new Param().set(key, value));
+    }
+
     public String get(String key) {
         for(Param param: params) {
             if (param.is(key))
