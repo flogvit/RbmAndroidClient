@@ -20,12 +20,17 @@ public class RbmAndroidClient {
 
     HashMap<Integer,ArrayList<Listener>> tags = new HashMap<>();
 
-    public RbmAndroidClient(String server) {
+    public RbmAndroidClient() {
+
+    }
+
+    public RbmAndroidClient withServer(String server) {
         try {
             init(server);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+        return this;
     }
 
     protected void init(String server) throws URISyntaxException {
