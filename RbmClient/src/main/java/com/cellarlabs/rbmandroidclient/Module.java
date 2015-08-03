@@ -9,6 +9,7 @@ abstract public class Module {
     protected RbmAndroidClient rbmClient = null;
 
     public Module(RbmAndroidClient rbmClient, String version) {
+        this.version = version;
         this.rbmClient = rbmClient;
     }
 
