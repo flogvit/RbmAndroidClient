@@ -54,6 +54,28 @@ public class Request {
         return this;
     }
 
+
+    public Request withParams(JSONObject params) {
+        Iterator<?> keys = params.keys();
+        while(keys.hasNext()) {
+            String key = (String) keys.next();
+            try {
+                Object value = params.get(key);
+                if (value instanceof String)
+                    withParam(key, params.getString(key));
+                else if (value instanceof Integer)
+                    withParam(key, params.getInt(key));
+                else if (value instanceof JSONArray)
+                    withParam(key, params.getJSONArray(key));
+                else if (value instanceof JSONObject)
+                    withParam(key, params.getJSONObject(key));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return this;
+    }
+
     public Request withParam(Param param) {
         params.add(param);
         return this;
