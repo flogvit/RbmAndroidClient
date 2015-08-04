@@ -97,6 +97,14 @@ public class Request {
         return withParam(new Param().set(key, value));
     }
 
+    public boolean has(String key) {
+        for(Param param: params) {
+            if (param.is(key))
+                return true;
+        }
+        return false;
+    }
+
     public Param get(String key) {
         for(Param param: params) {
             if (param.is(key))
