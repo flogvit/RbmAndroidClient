@@ -1,6 +1,10 @@
 package com.cellarlabs.rbmandroidclient;
 
+import android.util.Log;
+
 import com.github.nkzawa.engineio.client.Socket;
+
+import org.apache.http.auth.AUTH;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -17,6 +21,8 @@ public class RbmAndroidClient {
     private AtomicInteger nexttagid = new AtomicInteger(1);
     private static final int MAXREQID = 64000;
     private static final int MAXTAGID = 64000;
+
+    private Authenticate auth = null;
 
     HashMap<Integer,ArrayList<Listener>> tags = new HashMap<>();
 
@@ -45,6 +51,7 @@ public class RbmAndroidClient {
         socket.on(Socket.EVENT_MESSAGE, new com.github.nkzawa.emitter.Emitter.Listener() {
             @Override
             public void call(Object... args) {
+                Log.d("RBM", (String) args[0]);
                 Request req = new Request((String) args[0]);
                 if (req.hasReqid()) {
                     emitter.emit("_:"+req.getReqid(), req);
@@ -117,5 +124,28 @@ public class RbmAndroidClient {
             emitter.off(fn);
         }
         tags.remove(tag);
+    }
+
+    /**
+     * Authentication object
+     */
+    public void setAuthClass(Authenticate auth) {
+        if (this.auth!=null)
+            this.auth.removeListeners(this);
+        this.auth = auth;
+        auth.addListeners();
+        auth.onAuthenticate();
+    }
+
+    public Authenticate getAuthClass() {
+        return this.auth;
+    }
+
+    public void onTerminate() {
+        socket.close();
+        emitter.off();
+        tags.clear();
+        if (this.auth!=null)
+            auth.onTerminate();
     }
 }

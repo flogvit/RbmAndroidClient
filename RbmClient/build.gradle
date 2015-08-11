@@ -3,7 +3,7 @@ apply plugin: 'maven'
 
 archivesBaseName = 'rbmandroidclient'
 group = 'com.cellarlabs'
-version = '0.1.12'
+version = '0.1.13'
 
 android {
     compileSdkVersion 21
@@ -13,7 +13,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 21
         versionCode 1
-        versionName "0.1.12"
+        versionName "0.1.13"
     }
     buildTypes {
         release {
