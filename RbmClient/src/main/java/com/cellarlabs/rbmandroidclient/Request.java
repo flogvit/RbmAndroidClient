@@ -97,6 +97,10 @@ public class Request {
         return withParam(new Param().set(key, value));
     }
 
+    public Request withParam(String key, Boolean value) {
+        return withParam(key, ""+value);
+    }
+
     public boolean has(String key) {
         for (Param param : params) {
             if (param.is(key))
