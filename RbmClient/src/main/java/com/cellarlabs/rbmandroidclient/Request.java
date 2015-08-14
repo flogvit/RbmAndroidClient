@@ -1,10 +1,9 @@
 package com.cellarlabs.rbmandroidclient;
 
-import android.util.Log;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -117,7 +116,7 @@ public class Request {
         return null;
     }
 
-    public String getString(String key) {
+    public String  getString(String key) {
         Param param = get(key);
         if (param == null)
             return null;
@@ -227,8 +226,24 @@ public class Request {
 
         while (keys.hasNext()) {
             String key = (String) keys.next();
+
+
+            Param param;
+
             try {
-                Param param = new Param().set(key, obj.getString(key));
+                String data = obj.getString(key);
+                Object json = new JSONTokener(data).nextValue();
+                if (json instanceof JSONObject){
+                    param = new Param().set(key, (JSONObject)json);
+                }
+
+                else if (json instanceof JSONArray){
+                    param = new Param().set(key, (JSONArray)json);
+                }
+                else{
+                    param = new Param().set(key, data);
+                }
+
                 params.add(param);
             } catch (JSONException e) {
                 e.printStackTrace();
