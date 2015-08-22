@@ -1,5 +1,7 @@
 package com.cellarlabs.rbmandroidclient;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -227,25 +229,26 @@ public class Request {
         while (keys.hasNext()) {
             String key = (String) keys.next();
 
-
             Param param;
 
             try {
                 String data = obj.getString(key);
-                Object json = new JSONTokener(data).nextValue();
-                if (json instanceof JSONObject){
-                    param = new Param().set(key, (JSONObject)json);
-                }
 
-                else if (json instanceof JSONArray){
-                    param = new Param().set(key, (JSONArray)json);
-                }
-                else{
+                if(data == null || data.length() == 0){
                     param = new Param().set(key, data);
+                }else {
+                    Object json = new JSONTokener(data).nextValue();
+                    if (json instanceof JSONObject) {
+                        param = new Param().set(key, (JSONObject) json);
+                    } else if (json instanceof JSONArray) {
+                        param = new Param().set(key, (JSONArray) json);
+                    } else {
+                        param = new Param().set(key, data);
+                    }
                 }
-
                 params.add(param);
             } catch (JSONException e) {
+                Log.e("RBM", "Error parsing key " + key);
                 e.printStackTrace();
             }
         }

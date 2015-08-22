@@ -4,8 +4,6 @@ import android.util.Log;
 
 import com.github.nkzawa.engineio.client.Socket;
 
-import org.apache.http.auth.AUTH;
-
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +43,6 @@ public class RbmAndroidClient {
         socket.on(Socket.EVENT_OPEN, new com.github.nkzawa.emitter.Emitter.Listener() {
             @Override
             public void call(Object... args) {
-
             }
         });
         socket.on(Socket.EVENT_MESSAGE, new com.github.nkzawa.emitter.Emitter.Listener() {
