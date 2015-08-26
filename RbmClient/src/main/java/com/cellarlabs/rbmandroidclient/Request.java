@@ -22,7 +22,7 @@ public class Request {
     private int errorId = 0;
     private String errorText = "";
     private int count = 0;
-    private int resendAfter = 0;
+    private double resendAfter = 0;
 
     public Request() {
 
@@ -264,11 +264,11 @@ public class Request {
         return this.count;
     }
 
-    public void setResendAfter(int resendAfter) {
+    public void setResendAfter(double resendAfter) {
         this.resendAfter = resendAfter;
     }
 
-    public int getResendAfter() {
+    public double getResendAfter() {
         return this.resendAfter;
     }
 }

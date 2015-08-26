@@ -48,6 +48,8 @@ public class AckStore {
     public void remove(Request req) {
         if (mDbHelper==null) return;
 
+        Log.d("RBM", "Removing resend request");
+        Log.d("RBM", req.data());
         if (req.hasReqid())
             mDbHelper.removeRequest(req.getReqid());
     }

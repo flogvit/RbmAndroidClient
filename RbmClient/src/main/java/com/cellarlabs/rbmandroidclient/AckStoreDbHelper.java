@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by vhanssen on 25/08/15.
@@ -56,13 +57,14 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
                 + COL_REQID + " integer primary key, "
                 + COL_REQ + " text,"
                 + COL_COUNT + " integer default 0,"
-                + COL_RESEND + " integer)");
+                + COL_RESEND + " real)");
 
         db.execSQL("create index ind_" + TABLE_NAME + "_reqid on " + TABLE_NAME + "(" + COL_REQID + ")");
+        db.execSQL("create index ind_" + TABLE_NAME + "_resend on " + TABLE_NAME + "(" + COL_RESEND + ")");
     }
 
     public void addRequest(Request req) {
-        int resend = resendIntervallMS;
+        double resend = resendIntervallMS;
         if (req.getResendAfter()>0)
             resend = req.getResendAfter();
         ContentValues values = new ContentValues();
@@ -91,8 +93,7 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
                 return null;
 
             cursor.moveToFirst();
-            req = new Request(cursor.getString(cursor.getColumnIndex(COL_REQ)));
-            req.setReqid(cursor.getInt(cursor.getColumnIndex(COL_REQID)));
+            req = populateRequest(cursor);
         } finally {
             if (cursor != null)
                 cursor.close();
@@ -139,14 +140,13 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
         Request req = null;
         Cursor cursor = null;
         try {
-            cursor = db.query(TABLE_NAME, null, COL_RESEND+"<?",
+            cursor = db.query(TABLE_NAME, null, COL_RESEND+" < ?",
                 new String[] { String.valueOf(System.currentTimeMillis())}, null, null, null );
-            if (cursor!=null || cursor.getCount()==0)
+            if (cursor==null || cursor.getCount()==0) {
                 return null;
+            }
             cursor.moveToFirst();
-            req = new Request(cursor.getString(cursor.getColumnIndex(COL_REQ)));
-            req.setReqid(cursor.getInt(cursor.getColumnIndex(COL_REQID)));
-            req.setCount(cursor.getInt(cursor.getColumnIndex(COL_COUNT)));
+            req = populateRequest(cursor);
         } finally {
             if (cursor!=null)
                 cursor.close();
@@ -161,11 +161,20 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
 
         if (!req.hasReqid()) return;
         try {
-            db.execSQL("UPDATE " + TABLE_NAME + " SET " + COL_COUNT + "=" + COL_COUNT + "+1" + " WHERE " + COL_REQID + "=?",
+            db.execSQL("UPDATE " + TABLE_NAME + " SET " + COL_COUNT + "=" + COL_COUNT + "+1" + ", "+COL_RESEND+"="+(System.currentTimeMillis()+resendIntervallMS)+" WHERE " + COL_REQID + "=?",
                     new String[]{String.valueOf(req.getReqid())});
         } finally {
             if (db != null)
                 db.close();
         }
+    }
+
+    public Request populateRequest(Cursor cursor) {
+        Request req = new Request(cursor.getString(cursor.getColumnIndex(COL_REQ)));
+        req.setReqid(cursor.getInt(cursor.getColumnIndex(COL_REQID)));
+        req.setCount(cursor.getInt(cursor.getColumnIndex(COL_COUNT)));
+        req.setResendAfter(cursor.getDouble(cursor.getColumnIndex(COL_RESEND)) - System.currentTimeMillis());
+        double test = cursor.getDouble(cursor.getColumnIndex(COL_RESEND));
+        return req;
     }
 }
