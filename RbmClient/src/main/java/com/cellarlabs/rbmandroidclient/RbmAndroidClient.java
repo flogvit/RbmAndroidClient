@@ -239,4 +239,8 @@ public class RbmAndroidClient {
         this.ctx = ctx.getApplicationContext();
         ackstore.setContext(this.ctx);
     }
+
+    public Context getApplicationContext() {
+        return ctx;
+    }
 }
