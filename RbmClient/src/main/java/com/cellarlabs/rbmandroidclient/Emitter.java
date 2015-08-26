@@ -163,6 +163,18 @@ public class Emitter {
     }
 
     /**
+     * Return number of listeners for a specific event
+     *
+     * @param event en event name.
+     * @return the count
+     */
+    public int countListeners(String event) {
+        ConcurrentLinkedQueue<Listener> callbacks = this.callbacks.get(event);
+        if (callbacks == null) return 0;
+        return callbacks.size();
+    }
+
+    /**
      * Private class for listening to an event only once
      */
     private class OnceListener extends Listener {

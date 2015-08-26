@@ -28,6 +28,12 @@ abstract public class Authenticate {
         removeListeners(client);
         RBM_TAG = client.getUniqueTag();
 
+        client.on("server.closed", new Listener(RBM_TAG) {
+            @Override
+            public void onResponse(Request req) {
+                authenticated = false;
+            }
+        });
         client.on("user.authenticated", new Listener(RBM_TAG) {
             @Override
             public void onResponse(Request req) {

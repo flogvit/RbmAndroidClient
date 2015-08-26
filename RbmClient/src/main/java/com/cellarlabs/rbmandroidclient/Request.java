@@ -21,6 +21,8 @@ public class Request {
     private ArrayList<Param> params = new ArrayList<>();
     private int errorId = 0;
     private String errorText = "";
+    private int count = 0;
+    private int resendAfter = 0;
 
     public Request() {
 
@@ -252,5 +254,21 @@ public class Request {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public int getCount() {
+        return this.count;
+    }
+
+    public void setResendAfter(int resendAfter) {
+        this.resendAfter = resendAfter;
+    }
+
+    public int getResendAfter() {
+        return this.resendAfter;
     }
 }
