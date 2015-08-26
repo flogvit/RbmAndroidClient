@@ -17,4 +17,9 @@ abstract public class Module {
         req.withVersion(version);
         rbmClient.send(req, fn);
     }
+
+    public void sendAcknowledge(Request req, Listener fn) {
+        req.withVersion(version);
+        rbmClient.sendAcknowledge(req, fn);
+    }
 }

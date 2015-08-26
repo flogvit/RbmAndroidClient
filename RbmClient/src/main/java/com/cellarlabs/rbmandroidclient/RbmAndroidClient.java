@@ -220,6 +220,12 @@ public class RbmAndroidClient {
         return this.auth.isAuthenticated();
     }
 
+    public Integer getUid() {
+        if (this.auth==null) return null;
+        if (!this.auth.isAuthenticated()) return null;
+        return this.auth.getUid();
+    }
+
     public void onTerminate() {
         socket.close();
         emitter.off();

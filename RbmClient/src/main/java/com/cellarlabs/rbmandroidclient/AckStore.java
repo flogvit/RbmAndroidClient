@@ -40,6 +40,8 @@ public class AckStore {
     public void add(Request req) {
         if (mDbHelper==null) return;
 
+        Log.d("RBM", "Adding request to store");
+        Log.d("RBM", req.data());
         mDbHelper.addRequest(req);
     }
 
@@ -63,10 +65,16 @@ public class AckStore {
         Log.d("RBM", "Checking resend");
         Request req = mDbHelper.getNext();
         while(req!=null) {
-            Log.d("RBM", "Resending request");
-            Log.d("RBM", req.data());
-            mDbHelper.incRequest(req);
-            client.send(req);
+            if (req.getCount()>5) {
+                Log.d("RBM", "Deleting resend request");
+                Log.d("RBM", req.data());
+                mDbHelper.removeRequest(req.getReqid());
+            } else {
+                Log.d("RBM", "Resending request");
+                Log.d("RBM", req.data());
+                mDbHelper.incRequest(req);
+                client.send(req);
+            }
             req = mDbHelper.getNext();
         }
     }

@@ -24,6 +24,10 @@ abstract public class Authenticate {
         return authenticated;
     }
 
+    public Integer getUid() {
+        return uid;
+    }
+
     public void addListeners() {
         removeListeners(client);
         RBM_TAG = client.getUniqueTag();
