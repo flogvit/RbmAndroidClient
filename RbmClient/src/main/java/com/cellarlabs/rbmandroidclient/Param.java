@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -99,10 +100,40 @@ public class Param {
         return this.valueArray;
     }
 
-    public String get(String key) {
-        return null;
+    public ArrayList<Integer> getIntegerArray() {
+        ArrayList<Integer> result = new ArrayList<Integer>();
+        if (!isValueArray()) return result;
+        JSONArray values = getValueArray();
+        if(values == null || values.length() > 0) return result;
+
+        for(int i=0,len = values.length(); i<len; i++){
+            try {
+                result.add(values.getInt(i));
+            }catch(JSONException e){
+            }
+        }
+        return result;
     }
 
+    public ArrayList<String> getStringArray() {
+        ArrayList<String> result = new ArrayList<String>();
+        if (!isValueArray()) return result;
+        JSONArray values = getValueArray();
+        if(values == null || values.length() > 0) return result;
+
+        for(int i=0,len = values.length(); i<len; i++){
+            try {
+                result.add(values.getString(i));
+            }catch(JSONException e){
+            }
+        }
+        return result;
+    }
+
+/*    public String get(String key) {
+        return this.value;
+    }
+*/
     public Request getRequest() {
         return this.req;
     }
