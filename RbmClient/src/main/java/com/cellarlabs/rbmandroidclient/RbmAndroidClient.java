@@ -194,6 +194,7 @@ public class RbmAndroidClient {
      * @param tag
      */
     public void cancelCallbacks(int tag) {
+        if (!tags.containsKey(tag)) return;
         for (Listener fn : tags.get(tag)) {
             emitter.off(fn);
         }
