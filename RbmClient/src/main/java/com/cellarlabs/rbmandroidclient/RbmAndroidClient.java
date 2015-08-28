@@ -27,6 +27,7 @@ public class RbmAndroidClient {
 
     private int retry = 0;
     private String server = "";
+    private String module = "";
 
     private Authenticate auth = null;
     final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
@@ -243,5 +244,13 @@ public class RbmAndroidClient {
 
     public Context getApplicationContext() {
         return ctx;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    public String getModule() {
+        return this.module;
     }
 }
