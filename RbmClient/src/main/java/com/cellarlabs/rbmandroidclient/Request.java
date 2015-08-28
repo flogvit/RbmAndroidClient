@@ -92,6 +92,10 @@ public class Request {
         return withParam(key, "" + value);
     }
 
+    public Request withParam(String key, long value) {
+        return withParam(key, "" + value);
+    }
+
     public Request withParam(String key, JSONArray value) {
         return withParam(new Param().set(key, value));
     }
@@ -129,6 +133,10 @@ public class Request {
 
     public int getInteger(String key) {
         return Integer.parseInt(getString(key));
+    }
+
+    public long getLong(String key) {
+        return Long.parseLong(getString(key));
     }
 
     public boolean getBoolean(String key) {
