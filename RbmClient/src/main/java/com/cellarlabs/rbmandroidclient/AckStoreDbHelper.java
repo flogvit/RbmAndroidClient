@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 /**
  * Created by vhanssen on 25/08/15.
@@ -76,8 +75,6 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
         try {
             db.insert(TABLE_NAME, null, values);
         } finally {
-            if (db != null)
-                db.close();
         }
     }
 
@@ -97,14 +94,13 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
         } finally {
             if (cursor != null)
                 cursor.close();
-            if (db != null)
-                db.close();
             return req;
         }
     }
 
     public boolean hasRequest(int reqid) {
         SQLiteDatabase db = this.getReadableDatabase();
+
 
         Cursor cursor = null;
         Request req = null;
@@ -118,8 +114,6 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
         } finally {
             if (cursor != null)
                 cursor.close();
-            if (db != null)
-                db.close();
         }
     }
 
@@ -129,8 +123,6 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
             db.delete(TABLE_NAME, COL_REQID + " = ?",
                     new String[]{String.valueOf(reqid)});
         } finally {
-            if (db!=null)
-                db.close();
         }
     }
 
@@ -150,8 +142,6 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
         } finally {
             if (cursor!=null)
                 cursor.close();
-            if (db!=null)
-                db.close();
             return req;
         }
     }
@@ -164,8 +154,7 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
             db.execSQL("UPDATE " + TABLE_NAME + " SET " + COL_COUNT + "=" + COL_COUNT + "+1" + ", "+COL_RESEND+"="+(System.currentTimeMillis()+resendIntervallMS)+" WHERE " + COL_REQID + "=?",
                     new String[]{String.valueOf(req.getReqid())});
         } finally {
-            if (db != null)
-                db.close();
+
         }
     }
 
