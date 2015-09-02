@@ -28,6 +28,7 @@ public class RbmAndroidClient {
     private int retry = 0;
     private String server = "";
     private String module = "";
+    private boolean inshutdown = false;
 
     private Authenticate auth = null;
     final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
@@ -64,6 +65,7 @@ public class RbmAndroidClient {
     }
 
     protected void doInit() {
+        inshutdown = false;
         Log.d("RBM", "Doing doInit");
         if (++retry < 5) {
             try {
@@ -115,7 +117,8 @@ public class RbmAndroidClient {
             public void call(Object... args) {
                 Log.d("RBM", "Got socket close");
                 emitter.emit("server.closed", null);
-                doInit();
+                if (!inshutdown)
+                    doInit();
             }
         });
         socket.on(Socket.EVENT_ERROR, new com.github.nkzawa.emitter.Emitter.Listener() {
@@ -152,6 +155,7 @@ public class RbmAndroidClient {
     }
 
     public void send(Request req) {
+        Log.d("RBM", req.data());
         socket.send(req.data());
     }
 
@@ -228,12 +232,15 @@ public class RbmAndroidClient {
         return this.auth.getUid();
     }
 
-    public void onTerminate() {
-        socket.close();
+    public void onStop() {
+        inshutdown = true;
         emitter.off();
         tags.clear();
         if (this.auth != null)
-            auth.onTerminate();
+            auth.onStop();
+        if (this.ackstore!=null)
+            this.ackstore.onStop();
+        socket.close();
     }
 
     public void setApplicationContext(Context ctx) {

@@ -64,7 +64,7 @@ abstract public class Authenticate {
             client.cancelCallbacks(RBM_TAG);
     }
 
-    public void onTerminate() {
+    public void onStop() {
         client = null;
     }
 

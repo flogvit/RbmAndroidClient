@@ -35,4 +35,9 @@ public class RbmFactory {
         RbmFactory.module = module;
     }
 
+    public static void onStop() {
+        if (sRbmAndroidClient!=null)
+            sRbmAndroidClient.onStop();
+        sRbmAndroidClient = null;
+    }
 }

@@ -81,5 +81,9 @@ public class AckStore {
         }
     }
 
+    public void onStop() {
+        if (exec!=null)
+            exec.shutdown();
+    }
 
 }
