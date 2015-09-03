@@ -29,6 +29,7 @@ public class RbmAndroidClient {
     private String server = "";
     private String module = "";
     private boolean inshutdown = false;
+    private boolean open = false;
 
     private Authenticate auth = null;
     final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
@@ -99,6 +100,7 @@ public class RbmAndroidClient {
                 retry = 0;
                 emitter.emit("server.open", null);
                 Log.d("RBM", "socket open");
+                open = true;
             }
         });
         socket.on(Socket.EVENT_MESSAGE, new com.github.nkzawa.emitter.Emitter.Listener() {
@@ -118,6 +120,7 @@ public class RbmAndroidClient {
             public void call(Object... args) {
                 Log.d("RBM", "Got socket close");
                 emitter.emit("server.closed", null);
+                open = false;
                 if (!inshutdown)
                     doInit();
             }
@@ -177,7 +180,7 @@ public class RbmAndroidClient {
     }
 
     public void send(String req) {
-        Log.d("RBM", "--> "+req);
+        Log.d("RBM", "--> " + req);
         socket.send(req);
     }
 
@@ -261,5 +264,9 @@ public class RbmAndroidClient {
 
     public String getModule() {
         return this.module;
+    }
+
+    public boolean isOpen() {
+        return this.open;
     }
 }
