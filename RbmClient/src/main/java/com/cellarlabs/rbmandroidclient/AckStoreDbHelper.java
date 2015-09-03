@@ -126,6 +126,15 @@ public class AckStoreDbHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void removeAll() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            db.delete(TABLE_NAME, null,
+                    null);
+        } finally {
+        }
+    }
+
     public Request getNext() {
         SQLiteDatabase db = this.getReadableDatabase();
 

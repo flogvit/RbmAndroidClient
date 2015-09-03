@@ -49,7 +49,8 @@ public class RbmAndroidClient {
 
     public void setup() {
         Log.d("RBM", "Doing setup");
-        ackstore = new AckStore(ctx);
+        ackstore = AckStore.getAckStore();
+        ackstore.setContext(ctx);
         on("server.reconnect", new Listener() {
             @Override
             public void onResponse(Request req) {
@@ -103,7 +104,7 @@ public class RbmAndroidClient {
         socket.on(Socket.EVENT_MESSAGE, new com.github.nkzawa.emitter.Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.d("RBM", (String) args[0]);
+                Log.d("RBM", "<-- "+(String) args[0]);
                 Request req = new Request((String) args[0]);
                 if (req.hasReqid()) {
                     emitter.emit("_:" + req.getReqid(), req);
@@ -155,7 +156,7 @@ public class RbmAndroidClient {
     }
 
     public void send(Request req) {
-        Log.d("RBM", req.data());
+        Log.d("RBM", "--> "+req.data());
         socket.send(req.data());
     }
 
@@ -176,6 +177,7 @@ public class RbmAndroidClient {
     }
 
     public void send(String req) {
+        Log.d("RBM", "--> "+req);
         socket.send(req);
     }
 

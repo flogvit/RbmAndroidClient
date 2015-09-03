@@ -14,26 +14,44 @@ import java.util.concurrent.TimeUnit;
 public class AckStore {
     protected Context mContext = null;
     protected AckStoreDbHelper mDbHelper = null;
-    final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+    protected ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+    protected static AckStore instance;
 
-    public AckStore(Context context) {
+    private AckStore(Context context) {
         setContext(context);
-        exec.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    resend();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, 5, 10, TimeUnit.SECONDS);
+
+    }
+
+    public static AckStore getAckStore() {
+        if (instance==null)
+            instance = new AckStore(null);
+        return instance;
     }
 
     public void setContext(Context context) {
+        setContext(context, false);
+    }
+
+    public void setContext(Context context, boolean clear) {
         if (context!=null) {
             mContext = context.getApplicationContext() == null ? context : context.getApplicationContext();
             mDbHelper = AckStoreDbHelper.get(mContext);
+            if (clear)
+                mDbHelper.removeAll();
+            if (exec!=null) {
+                exec.shutdown();
+            }
+            exec = Executors.newScheduledThreadPool(1);
+            exec.scheduleWithFixedDelay(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        resend();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, 5, 10, TimeUnit.SECONDS);
         }
     }
 
@@ -61,6 +79,12 @@ public class AckStore {
     }
 
     public void resend() {
+        if (mContext==null) {
+            if (exec!=null) {
+                exec.shutdown();
+                exec = null;
+            }
+        }
         if (mDbHelper==null) return;
         RbmAndroidClient client = RbmFactory.getRbmClient();
         if (!client.isAuthenticated()) return;
@@ -86,4 +110,8 @@ public class AckStore {
             exec.shutdown();
     }
 
+    public void clear() {
+        if (mDbHelper==null) return;
+        mDbHelper.removeAll();
+    }
 }
