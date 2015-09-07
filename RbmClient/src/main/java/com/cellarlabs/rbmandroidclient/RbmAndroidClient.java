@@ -30,6 +30,7 @@ public class RbmAndroidClient {
     private String module = "";
     private boolean inshutdown = false;
     private boolean open = false;
+    private boolean stopped = true;
 
     private Authenticate auth = null;
     final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
@@ -149,6 +150,8 @@ public class RbmAndroidClient {
         emitter.on(command, fn);
     }
 
+    public void off(String command, final Listener fn) { emitter.off(command, fn); }
+
     protected int getNextUniqueId() {
         int id = 0;
         do {
@@ -246,6 +249,15 @@ public class RbmAndroidClient {
         if (this.ackstore!=null)
             this.ackstore.onStop();
         socket.close();
+        stopped = true;
+    }
+
+    public void onStart() {
+        if (stopped) {
+            stopped = false;
+            setup();
+            doInit();
+        }
     }
 
     public void setApplicationContext(Context ctx) {

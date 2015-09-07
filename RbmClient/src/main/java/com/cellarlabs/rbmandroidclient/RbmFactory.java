@@ -38,6 +38,11 @@ public class RbmFactory {
     public static void onStop() {
         if (sRbmAndroidClient!=null)
             sRbmAndroidClient.onStop();
-        sRbmAndroidClient = null;
+//        sRbmAndroidClient = null;
+    }
+
+    public static void onStart() {
+        if (sRbmAndroidClient!=null)
+            sRbmAndroidClient.onStart();
     }
 }
