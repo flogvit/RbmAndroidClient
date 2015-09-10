@@ -24,7 +24,8 @@ public class RbmLocalDbHelper extends SQLiteOpenHelper {
     public static final String COL_VALUE = "kvvalue";
     public static final String COL_LASTUPDATED = "lastupdated";
 
-    public static RbmLocalDbHelper get(Context context) {
+    public static RbmLocalDbHelper get() {
+        Context context = RbmFactory.getRbmClient().getApplicationContext();
         if (sInstance == null) {
             Context ctx = context.getApplicationContext() != null ? context.getApplicationContext() : context;
             sInstance = new RbmLocalDbHelper(ctx);
@@ -95,7 +96,7 @@ public class RbmLocalDbHelper extends SQLiteOpenHelper {
     }
 
     public void set(String command, String keys, String value) {
-        Log.d("RBM", "Storing key " + command+" "+keys+" "+value);
+        Log.d("RBM", "Storing key " + command + " " + keys + " " + value);
         ContentValues values = new ContentValues();
         values.put(COL_VALUE, value);
         values.put(COL_LASTUPDATED, System.currentTimeMillis());
