@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,11 +30,13 @@ public class RbmAndroidClient {
     private String server = "";
     private String module = "";
     private boolean inshutdown = false;
+    private boolean ininit = false;
     private boolean open = false;
     private boolean stopped = true;
 
     private Authenticate auth = null;
     final ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture execRun;
 
     HashMap<Integer, ArrayList<Listener>> tags = new HashMap<>();
 
@@ -69,6 +72,8 @@ public class RbmAndroidClient {
 
     protected void doInit() {
         inshutdown = false;
+        if (execRun!=null)
+            execRun.cancel(true);
         Log.d("RBM", "Doing doInit");
         if (++retry < 5) {
             try {
@@ -77,7 +82,7 @@ public class RbmAndroidClient {
                 e.printStackTrace();
             }
         } else {
-             exec.schedule(new Runnable() {
+             execRun = exec.schedule(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -92,6 +97,8 @@ public class RbmAndroidClient {
     }
 
     protected void init() throws URISyntaxException {
+        if (ininit) return;
+        ininit = true;
         Log.d("RBM", "Doing init with server "+this.server);
         if (socket!=null) socket.close();
         socket = new Socket(this.server);
@@ -99,6 +106,7 @@ public class RbmAndroidClient {
             @Override
             public void call(Object... args) {
                 retry = 0;
+                ininit = false;
                 emitter.emit("server.open", null);
                 Log.d("RBM", "socket open");
                 open = true;
@@ -119,6 +127,7 @@ public class RbmAndroidClient {
         socket.on(Socket.EVENT_CLOSE, new com.github.nkzawa.emitter.Emitter.Listener() {
             @Override
             public void call(Object... args) {
+                ininit = false;
                 Log.d("RBM", "Got socket close");
                 emitter.emit("server.closed", null);
                 open = false;
@@ -240,8 +249,17 @@ public class RbmAndroidClient {
         return this.auth.getUid();
     }
 
+    public void close() {
+        inshutdown = true;
+        if (execRun!=null)
+            execRun.cancel(true);
+        socket.close();
+    }
+
     public void onStop() {
         inshutdown = true;
+        if (execRun!=null)
+            execRun.cancel(true);
         emitter.off();
         tags.clear();
         if (this.auth != null)
