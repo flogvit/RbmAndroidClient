@@ -149,4 +149,12 @@ public class Param {
         }
         return result;
     }
+
+    public String toString() {
+        if (isValueObject())
+            return getValueObject().toString();
+        if (isValueArray())
+            return getValueArray().toString();
+        return value;
+    }
 }
