@@ -88,11 +88,11 @@ public class RbmLocalDbHelper extends SQLiteOpenHelper {
     }
 
     public String get(String command, String[] keys) {
-        return get(command, TextUtils.join(":", keys));
+        return get(command, keys==null ? "" : TextUtils.join(":", keys));
     }
 
     public void set(String command, String[] keys, String value) {
-        set(command, TextUtils.join(":", keys), value);
+        set(command, keys==null ? "" : TextUtils.join(":", keys), value);
     }
 
     public void set(String command, String keys, String value) {
