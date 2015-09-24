@@ -112,7 +112,7 @@ public class Param implements Iterable<Param> {
                 if(data == null || data.length() == 0){
                     add(key, data);
                 }else {
-                    Object json = new JSONTokener(data).nextValue();
+                    Object json = obj.get(key);
                     if (json instanceof JSONObject) {
                         param = add(key);
                         param.add((JSONObject) json);

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,6 +105,36 @@ public class ParamTest extends InstrumentationTestCase {
         assertEquals(2, (int) list.get(1));
         assertEquals(3, (int) list.get(2));
         assertEquals(4, (int) list.get(3));
+    }
+
+    public void testSubJSONString() throws JSONException {
+        Param params = new Param("params");
+        params.add("test", "{\"test2\": \"2\"}");
+        Param p2 = new Param("params");
+        p2.add(new JSONObject(params.getJSON().toString()));
         Log.d("RBM", params.getJSON().toString());
+        Log.d("RBM", p2.getJSON().toString());
+
+        JSONObject t2 = new JSONObject("{\"test2\": \"2\"}");
+        JSONObject t = new JSONObject();
+        t.put("test", t2.toString());
+        Log.d("RBM", t.toString());
+
+        Param p3 = new Param("params");
+        p3.add(t);
+        Log.d("RBM", "S: " + p3.getString("test"));
+        Log.d("RBM", p3.getJSON().toString());
+
+        Object t3 = t.get("test");
+        if (t3 instanceof JSONObject) {
+            Log.d("RBM", "t3 is object");
+        } else if (t3 instanceof String) {
+            Log.d("RBM", "t3 is string");
+        }
+        Object json = new JSONTokener((String) t.get("test")).nextValue();
+        Log.d("RBM", json.toString());
+        if (json instanceof JSONObject) {
+            Log.d("RBM", "Is JSONObject");
+        }
     }
 }
