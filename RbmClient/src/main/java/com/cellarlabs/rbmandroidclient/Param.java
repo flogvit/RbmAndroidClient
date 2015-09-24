@@ -1,160 +1,285 @@
 package com.cellarlabs.rbmandroidclient;
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 
 /**
- * Created by vhanssen on 06/06/15.
+ * Created by vhanssen on 22/09/15.
  */
-public class Param {
-    private String key = "";
-    private String value = "";
-    private JSONArray valueArray = null;
-    private JSONObject valueObject = null;
+public class Param implements Iterable<Param> {
 
-    private Request req = null;
-    private HashMap<String,String> paramMap = null;
+    String data;
+    Param parent;
+    ArrayList<Param> children;
 
-    public Param set(Request req) {
-        this.req = req;
+    public Param(String data) {
+        this.data = data;
+        this.children = new ArrayList<Param>();
+    }
+
+    public Param(String key, String value) {
+        this(key);
+        add(value);
+    }
+
+    /**
+     * TODO: Need to traverse on add to get unique values
+     * @param param
+     * @return
+     */
+    public Param add(Param param) {
+        param.parent = this;
+        this.children.add(param);
+        return param;
+    }
+
+    public Param add(String entry) {
+        if (has(entry)) return get(entry);
+        Param param = new Param(entry);
+        return add(param);
+    }
+
+
+    public Param add(String key, String value) {
+        Param param;
+        if (has(key))
+            param = get(key);
+        else
+            param = add(key);
+        param.add(value);
+        return param;
+    }
+
+    public Param add(String key, Integer value) {
+        return add(key, Integer.toString(value));
+    }
+
+    public Param add(String key, Long value) {
+        return add(key, Long.toString(value));
+    }
+
+    public Param add(String key, JSONArray values) {
+        Param param = add(key);
+        for(int i=0,len = values.length(); i<len; i++){
+            try {
+                param.add(values.getString(i));
+            }catch(JSONException e){
+            }
+        }
+        return param;
+    }
+
+    public Param add(String key, ArrayList<String> values) {
+        Param param = add(key);
+        for(String v: values) {
+            param.add(v);
+        }
+        return param;
+    }
+
+    public Param add(String key, String[] values) {
+        Param param = add(key);
+        for(String v: values) {
+            param.add(v);
+        }
+        return param;
+    }
+
+    public Param add(String key, JSONObject obj) {
+        Param param = add(key);
+        param.add(obj);
+        return param;
+    }
+
+    public Param add(JSONObject obj) {
+        Iterator<?> keys = obj.keys();
+
+        while (keys.hasNext()) {
+            String key = (String) keys.next();
+
+            Param param;
+
+            try {
+                String data = obj.getString(key);
+
+                if(data == null || data.length() == 0){
+                    add(key, data);
+                }else {
+                    Object json = new JSONTokener(data).nextValue();
+                    if (json instanceof JSONObject) {
+                        param = add(key);
+                        param.add((JSONObject) json);
+                    } else if (json instanceof JSONArray) {
+                        add(key, (JSONArray) json);
+                    } else {
+                        add(key, data);
+                    }
+                }
+            } catch (JSONException e) {
+                Log.e("RBM", "Error parsing key " + key);
+                e.printStackTrace();
+            }
+        }
         return this;
-    }
-
-    public Param addMapping(String from, String to) {
-        if (paramMap==null)
-            paramMap = new HashMap<>();
-        paramMap.put(to, from);
-
-        return this;
-    }
-
-    public Param set(Request req, HashMap<String,String> paramMap) {
-        this.req = req;
-        this.paramMap = paramMap;
-        return this;
-    }
-
-    public Param set(String key, String[] values) {
-
-        return this;
-    }
-
-    public Param set(String key, String value) {
-        this.key = key;
-        this.value = value;
-        this.valueArray = null;
-        this.valueObject = null;
-        return this;
-    }
-
-    public Param set(String key, JSONObject value) {
-        this.valueObject = value;
-        this.value = "";
-        this.valueArray = null;
-        this.key = key;
-        return this;
-    }
-
-    public Param set(String key, JSONArray value) {
-        this.valueArray = value;
-        this.valueObject = null;
-        this.value = "";
-        this.key = key;
-
-        return this;
-    }
-
-    public boolean is(String key) {
-        return this.key.equals(key);
-    }
-
-    public boolean isRequest() {
-        return this.req!=null;
-    }
-
-    public boolean isValueObject() {
-        return this.valueObject!=null;
-    }
-
-    public boolean isValueArray() {
-        return this.valueArray!=null;
     }
 
     public String getKey() {
-        return this.key;
+        return data;
     }
 
-    public String getValue() {
-        return this.value;
+    public String getString(String key) {
+        if (has(key))
+            return get(key).getString();
+        return "";
     }
 
-    public JSONObject getValueObject() {
-        return this.valueObject;
+    public String getString() {
+        return children.size()==1 ? children.get(0).getKey() : "";
     }
 
-    public JSONArray getValueArray() {
-        return this.valueArray;
+    public long getLong(String key) {
+        try {
+            return Long.parseLong(getString(key));
+        } catch (Exception e) {
+            return 0L;
+        }
     }
 
-    public ArrayList<Integer> getIntegerArray() {
-        ArrayList<Integer> result = new ArrayList<Integer>();
-        if (!isValueArray()) return result;
-        JSONArray values = getValueArray();
-        if(values == null || values.length() > 0) return result;
+    public long getLong() {
+        try {
+            return Long.parseLong(getString());
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
 
-        for(int i=0,len = values.length(); i<len; i++){
-            try {
-                result.add(values.getInt(i));
-            }catch(JSONException e){
-            }
+    public int getInteger(String key) {
+        try {
+            return Integer.parseInt(getString(key));
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public int getInteger() {
+        try {
+            return Integer.parseInt(getString());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public boolean getBoolean(String key) {
+        try {
+            return Boolean.parseBoolean(getString(key));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean getBoolean() {
+        try {
+            return Boolean.parseBoolean(getString());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public ArrayList<Param> getArrray() {
+        return children;
+    }
+
+    public ArrayList<String> getArrayString() {
+        ArrayList<String> result = new ArrayList<>();
+        for (Param child: children) {
+            result.add(child.getKey());
         }
         return result;
     }
 
-    public ArrayList<String> getStringArray() {
-        ArrayList<String> result = new ArrayList<String>();
-        if (!isValueArray()) return result;
-        JSONArray values = getValueArray();
-        if(values == null || values.length() > 0) return result;
-
-        for(int i=0,len = values.length(); i<len; i++){
-            try {
-                result.add(values.getString(i));
-            }catch(JSONException e){
-            }
+    public ArrayList<Integer> getArrayInteger() {
+        ArrayList<Integer> result = new ArrayList<>();
+        for (Param child: children) {
+            result.add(child.getInteger());
         }
         return result;
     }
 
-/*    public String get(String key) {
-        return this.value;
-    }
-*/
-    public Request getRequest() {
-        return this.req;
+    public ArrayList<Long> getArrayLong() {
+        ArrayList<Long> result = new ArrayList<>();
+        for (Param child: children) {
+            result.add(child.getLong());
+        }
+        return result;
     }
 
-    public JSONObject getMap() {
+    public boolean isValue() {
+        return children.size()==0;
+    }
+
+    public boolean isKeyValue() {
+        return (children.size()==1 && children.get(0).children.size()==0);
+    }
+
+    public boolean isArray() {
+        if (children.size()<2) return false;
+
+        for (Param child: children) {
+            if (!child.isValue())
+                return false;
+        }
+        return true;
+    }
+
+    public Param get(String entry) {
+        for(Param child: children) {
+            if (child.getKey().equals(entry))
+                return child;
+        }
+        return null;
+    }
+
+    public boolean has(String entry) {
+        for(Param child: children) {
+            if (child.getKey().equals(entry))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Iterator<Param> iterator() {
+        return children.iterator();
+    }
+
+    public JSONObject getJSON() {
         JSONObject result = new JSONObject();
-        for(String key: paramMap.keySet()) {
-            try {
-                result.put(key, paramMap.get(key));
-            } catch (JSONException e) {
-                e.printStackTrace();
+        try {
+            for (Param param : children) {
+                if (param.isKeyValue()) {
+                    result.put(param.getKey(), param.getString());
+                } else if (param.isArray()) {
+                    result.put(param.getKey(), new JSONArray(param.getArrayString()));
+                } else {
+                    JSONObject res = param.getJSON();
+                    result.put(param.getKey(), res);
+                }
             }
+        } catch(Exception e) {
+            Log.d("RBM", "Something went wrong");
         }
         return result;
     }
 
     public String toString() {
-        if (isValueObject())
-            return getValueObject().toString();
-        if (isValueArray())
-            return getValueArray().toString();
-        return value;
+        return getKey();
     }
+
 }

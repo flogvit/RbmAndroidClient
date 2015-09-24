@@ -18,7 +18,7 @@ public class Request {
     private int reqid = 0;
     private JSONObject json = null;
     private String version = "";
-    private ArrayList<Param> params = new ArrayList<>();
+    private Param params = new Param("params");
     private int errorId = 0;
     private String errorText = "";
     private int count = 0;
@@ -35,7 +35,7 @@ public class Request {
             this.reqid = json.has("reqid") ? json.getInt("reqid") : this.reqid;
             this.version = json.has("version") ? json.getString("version") : this.version;
             if (json.has("params"))
-                parseParams(json.getJSONObject("params"));
+                params.add(json.getJSONObject("params"));
             this.errorId = json.has("error") ? json.getInt("error") : this.errorId;
             this.errorText = json.has("errorText") ? json.getString("errorText") : this.errorText;
         } catch (Exception e) {
@@ -59,23 +59,7 @@ public class Request {
 
 
     public Request withParams(JSONObject params) {
-        Iterator<?> keys = params.keys();
-        while (keys.hasNext()) {
-            String key = (String) keys.next();
-            try {
-                Object value = params.get(key);
-                if (value instanceof String)
-                    withParam(key, params.getString(key));
-                else if (value instanceof Integer)
-                    withParam(key, params.getInt(key));
-                else if (value instanceof JSONArray)
-                    withParam(key, params.getJSONArray(key));
-                else if (value instanceof JSONObject)
-                    withParam(key, params.getJSONObject(key));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+        this.params.add(params);
         return this;
     }
 
@@ -85,23 +69,26 @@ public class Request {
     }
 
     public Request withParam(String key, String value) {
-        return withParam(new Param().set(key, value));
+        params.add(key, value);
+        return this;
     }
 
     public Request withParam(String key, int value) {
-        return withParam(key, "" + value);
+        return withParam(key, Integer.toString(value));
     }
 
     public Request withParam(String key, long value) {
-        return withParam(key, "" + value);
+        return withParam(key, Long.toString(value));
     }
 
     public Request withParam(String key, JSONArray value) {
-        return withParam(new Param().set(key, value));
+        params.add(key, value);
+        return this;
     }
 
     public Request withParam(String key, JSONObject value) {
-        return withParam(new Param().set(key, value));
+        params.add(key, value);
+        return this;
     }
 
     public Request withParam(String key, Boolean value) {
@@ -109,38 +96,31 @@ public class Request {
     }
 
     public boolean has(String key) {
-        for (Param param : params) {
-            if (param.is(key))
-                return true;
-        }
-        return false;
+        return params.has(key);
     }
 
     public Param get(String key) {
-        for (Param param : params) {
-            if (param.is(key))
-                return param;
-        }
-        return null;
+        return params.get(key);
     }
 
-    public String  getString(String key) {
-        Param param = get(key);
-        if (param == null)
-            return null;
-        return param.getValue();
+    public String getString(String key) {
+        return params.getString(key);
     }
 
     public int getInteger(String key) {
-        return Integer.parseInt(getString(key));
+        return params.getInteger(key);
     }
 
     public long getLong(String key) {
-        return Long.parseLong(getString(key));
+        return params.getLong(key);
     }
 
     public boolean getBoolean(String key) {
-        return Boolean.parseBoolean(getString(key));
+        return params.getBoolean(key);
+    }
+
+    public Param getParams() {
+        return this.params;
     }
 
     public boolean hasReqid() {
@@ -160,7 +140,8 @@ public class Request {
         JSONObject object = new JSONObject();
         try {
             object.put("command", this.command);
-            buildParams(object);
+            object.put("params", this.params.getJSON());
+//            buildParams(object);
             if (hasReqid())
                 object.put("reqid", this.reqid);
             if (hasVersion())
@@ -195,7 +176,7 @@ public class Request {
         return this.errorText;
     }
 
-    protected void buildParams(JSONObject obj) {
+/*    protected void buildParams(JSONObject obj) {
         JSONObject jsonparams = new JSONObject();
         JSONArray populate = null;
 
@@ -224,15 +205,16 @@ public class Request {
             e.printStackTrace();
         }
     }
+*/
 
     /**
      * Parse the incoming params
      * <p/>
      * TODO: Need to implement arrays etc later on
      *
-     * @param obj
+     * @param
      */
-    protected void parseParams(JSONObject obj) {
+/*    protected void parseParams(JSONObject obj) {
         this.params = new ArrayList<>();
         Iterator<?> keys = obj.keys();
 
@@ -263,7 +245,7 @@ public class Request {
             }
         }
     }
-
+*/
     public void setCount(int count) {
         this.count = count;
     }
