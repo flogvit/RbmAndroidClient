@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by vhanssen on 21/09/15.
@@ -91,5 +92,18 @@ public class ParamTest extends InstrumentationTestCase {
     public void testToString() {
         Param params = new Param("params");
         assertEquals("params", params.toString());
+    }
+
+    public void testIntegerArray() throws JSONException {
+        JSONObject obj = new JSONObject("{\"uid\": [1,2,3,4]}");
+        Param params = new Param("params");
+        params.add(obj);
+        ArrayList<Integer> list = params.get("uid").getArrayInteger();
+        Collections.sort(list);
+        assertEquals(1, (int) list.get(0));
+        assertEquals(2, (int) list.get(1));
+        assertEquals(3, (int) list.get(2));
+        assertEquals(4, (int) list.get(3));
+        Log.d("RBM", params.getJSON().toString());
     }
 }

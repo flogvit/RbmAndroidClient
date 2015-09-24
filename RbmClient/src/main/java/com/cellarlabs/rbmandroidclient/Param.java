@@ -134,6 +134,30 @@ public class Param implements Iterable<Param> {
         return data;
     }
 
+    public Integer getKeyInteger() {
+        try {
+            return Integer.parseInt(getKey());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public Long getKeyLong() {
+        try {
+            return Long.parseLong(getKey());
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    public boolean getKeyBoolean() {
+        try {
+            return Boolean.parseBoolean(getKey());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public String getString(String key) {
         if (has(key))
             return get(key).getString();
@@ -207,7 +231,7 @@ public class Param implements Iterable<Param> {
     public ArrayList<Integer> getArrayInteger() {
         ArrayList<Integer> result = new ArrayList<>();
         for (Param child: children) {
-            result.add(child.getInteger());
+            result.add(child.getKeyInteger());
         }
         return result;
     }
@@ -215,7 +239,7 @@ public class Param implements Iterable<Param> {
     public ArrayList<Long> getArrayLong() {
         ArrayList<Long> result = new ArrayList<>();
         for (Param child: children) {
-            result.add(child.getLong());
+            result.add(child.getKeyLong());
         }
         return result;
     }
