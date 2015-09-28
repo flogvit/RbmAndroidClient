@@ -112,29 +112,22 @@ public class ParamTest extends InstrumentationTestCase {
         params.add("test", "{\"test2\": \"2\"}");
         Param p2 = new Param("params");
         p2.add(new JSONObject(params.getJSON().toString()));
+        assertEquals("{\"test\":\"{\\\"test2\\\": \\\"2\\\"}\"}", params.getJSON().toString());
+        assertEquals("{\"test\":\"{\\\"test2\\\": \\\"2\\\"}\"}", p2.getJSON().toString());
+    }
+
+    public void testArrayObjects() throws JSONException {
+        JSONObject obj = new JSONObject("{\"test\": [{\"test2\": 1},{\"test3\": 2}], \"test2\": [1,2,3]}");
+        Param params = new Param("params");
+        params.add(obj);
+        assertEquals("{\"test\":[{\"test2\":\"1\"},{\"test3\":\"2\"}],\"test2\":[\"1\",\"2\",\"3\"]}", params.getJSON().toString());
+    }
+
+    public void testArrayObjects2() throws JSONException {
+        JSONObject obj = new JSONObject("{\"test\": [{\"test2\": 2, \"test1\": 1}, {\"test2\": 3, \"test3\": 4}, {\"test3\": {\"test1\": [1,2,3]}}]}");
+        Param params = new Param("params");
+        params.add(obj);
         Log.d("RBM", params.getJSON().toString());
-        Log.d("RBM", p2.getJSON().toString());
-
-        JSONObject t2 = new JSONObject("{\"test2\": \"2\"}");
-        JSONObject t = new JSONObject();
-        t.put("test", t2.toString());
-        Log.d("RBM", t.toString());
-
-        Param p3 = new Param("params");
-        p3.add(t);
-        Log.d("RBM", "S: " + p3.getString("test"));
-        Log.d("RBM", p3.getJSON().toString());
-
-        Object t3 = t.get("test");
-        if (t3 instanceof JSONObject) {
-            Log.d("RBM", "t3 is object");
-        } else if (t3 instanceof String) {
-            Log.d("RBM", "t3 is string");
-        }
-        Object json = new JSONTokener((String) t.get("test")).nextValue();
-        Log.d("RBM", json.toString());
-        if (json instanceof JSONObject) {
-            Log.d("RBM", "Is JSONObject");
-        }
+        assertEquals("{\"test\":[{\"test2\":\"2\",\"test1\":\"1\"},{\"test2\":\"3\",\"test3\":\"4\"},{\"test3\":{\"test1\":[\"1\",\"2\",\"3\"]}}]}", params.getJSON().toString());
     }
 }

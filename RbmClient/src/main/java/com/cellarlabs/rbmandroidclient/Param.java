@@ -5,7 +5,7 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.json.JSONStringer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,6 +18,8 @@ public class Param implements Iterable<Param> {
     String data;
     Param parent;
     ArrayList<Param> children;
+    boolean isArray = false;
+    int maxArrayValue = -1;
 
     public Param(String data) {
         this.data = data;
@@ -67,10 +69,27 @@ public class Param implements Iterable<Param> {
 
     public Param add(String key, JSONArray values) {
         Param param = add(key);
+        param.setAsArray(true);
         for(int i=0,len = values.length(); i<len; i++){
+            Param num = param.add(param.getNextArrayValue());
             try {
-                param.add(values.getString(i));
-            }catch(JSONException e){
+                String data = values.getString(i);
+
+                if(data == null || data.length() == 0){
+                    num.add(data);
+                }else {
+                    Object json = values.get(i);
+                    if (json instanceof JSONObject) {
+                        num.add((JSONObject) json);
+                    } else if (json instanceof JSONArray) {
+                        num.add(key, (JSONArray) json);
+                    } else {
+                        num.add(data);
+                    }
+                }
+            } catch (JSONException e) {
+                Log.e("RBM", "Error parsing key " + key);
+                e.printStackTrace();
             }
         }
         return param;
@@ -99,6 +118,11 @@ public class Param implements Iterable<Param> {
     }
 
     public Param add(JSONObject obj) {
+        if (isArray) {
+            Param p = add(getNextArrayValue());
+            p.add(obj);
+            return this;
+        }
         Iterator<?> keys = obj.keys();
 
         while (keys.hasNext()) {
@@ -223,7 +247,7 @@ public class Param implements Iterable<Param> {
     public ArrayList<String> getArrayString() {
         ArrayList<String> result = new ArrayList<>();
         for (Param child: children) {
-            result.add(child.getKey());
+            result.add(child.children.get(0).getKey());
         }
         return result;
     }
@@ -231,7 +255,7 @@ public class Param implements Iterable<Param> {
     public ArrayList<Integer> getArrayInteger() {
         ArrayList<Integer> result = new ArrayList<>();
         for (Param child: children) {
-            result.add(child.getKeyInteger());
+            result.add(child.children.get(0).getKeyInteger());
         }
         return result;
     }
@@ -239,7 +263,7 @@ public class Param implements Iterable<Param> {
     public ArrayList<Long> getArrayLong() {
         ArrayList<Long> result = new ArrayList<>();
         for (Param child: children) {
-            result.add(child.getKeyLong());
+            result.add(child.children.get(0).getKeyLong());
         }
         return result;
     }
@@ -253,6 +277,8 @@ public class Param implements Iterable<Param> {
     }
 
     public boolean isArray() {
+        if (this.isArray) return true;
+
         if (children.size()<2) return false;
 
         for (Param child: children) {
@@ -262,12 +288,20 @@ public class Param implements Iterable<Param> {
         return true;
     }
 
+    public void setAsArray(boolean value) {
+        this.isArray = value;
+    }
+
     public Param get(String entry) {
         for(Param child: children) {
             if (child.getKey().equals(entry))
                 return child;
         }
         return null;
+    }
+
+    public Param get(Integer entry) {
+        return get(String.valueOf(entry));
     }
 
     public boolean has(String entry) {
@@ -284,22 +318,108 @@ public class Param implements Iterable<Param> {
     }
 
     public JSONObject getJSON() {
+        JSONStringer str = new JSONStringer();
+        try {
+            createJSON(str);
+            return new JSONObject(str.toString());
+        } catch (Exception e) {}
+        return null;
+    }
+
+    public JSONObject getJSON(String key) {
         JSONObject result = new JSONObject();
         try {
             for (Param param : children) {
                 if (param.isKeyValue()) {
                     result.put(param.getKey(), param.getString());
                 } else if (param.isArray()) {
-                    result.put(param.getKey(), new JSONArray(param.getArrayString()));
+                    JSONArray array = new JSONArray();
+                    Log.d("RBM", "Array "+param.getKey());
+                    for(Param num: param.children) {
+                        Log.d("RBM", "Num "+num.getKey());
+                        for (Param child : num.children) {
+                            array.put(child.getJSON(param.getKey()));
+/*                            if (child.isKeyValue()) {
+                                Log.d("RBM", "Is keyvalue "+child.getKey());
+                                JSONObject n = new JSONObject();
+                                n.put(child.getKey(), child.getString());
+                                array.put(n);
+                            } else if (child.isValue()) {
+                                Log.d("RBM", "Is value "+child.getKey());
+                                array.put(child.getKey());
+                            } else {
+                                Log.d("RBM", "Is object "+child.getKey());
+                                array.put(child.getJSON(child.getKey()));
+                            } */
+                        }
+                    }
+                    result.put(param.getKey(), array);
                 } else {
                     JSONObject res = param.getJSON();
                     result.put(param.getKey(), res);
                 }
             }
+            if (key!=null) {
+                JSONObject t = new JSONObject();
+                t.put(key, result);
+                return t;
+            }
+            return result;
         } catch(Exception e) {
             Log.d("RBM", "Something went wrong");
+            return null;
         }
-        return result;
+    }
+
+    public void createJSON(JSONStringer str) {
+        try {
+            Log.d("RBM", "Key: " + getKey());
+            if (isValue()) {
+                Log.d("RBM", "Is value "+getKey());
+                str.value(getKey());
+            } else if (isKeyValue()) {
+                Log.d("RBM", "Is keyvalue "+getKey());
+                str.value(getString());
+            } else if (isArray()) {
+                Log.d("RBM", "Is array " + getKey());
+                str.array();
+                for (Param child2 : children) {
+//                    Param child = child2.children;
+                    child2.createJSON(str);
+                }
+                str.endArray();
+                Log.d("RBM", "Finished array " + getKey());
+            } else {
+                Log.d("RBM", "Is object "+getKey());
+                str.object();
+                for (Param child : children) {
+//                    if (!child.isValue())
+                        str.key(child.getKey());
+//                    if (child.isArray())
+                    Log.d("RBM", "Adding key "+child.getKey());
+//                    str.key(child.getKey());
+                    Log.d("RBM", "Child " + child.getKey());
+                    if (child.isValue()) {
+                        str.object();
+                        str.endObject();
+                    } else
+                        child.createJSON(str);
+                }
+                str.endObject();
+            }
+            return ;
+        } catch (Exception e) {
+            Log.d("RBM", "=============== Error "+e.getMessage());
+            Log.d("RBM", str.toString());
+        }
+        return ;
+    }
+
+    protected String getNextArrayValue() {
+        synchronized (this) {
+            maxArrayValue++;
+            return String.valueOf(maxArrayValue);
+        }
     }
 
     public String toString() {
