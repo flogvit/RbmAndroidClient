@@ -127,7 +127,54 @@ public class ParamTest extends InstrumentationTestCase {
         JSONObject obj = new JSONObject("{\"test\": [{\"test2\": 2, \"test1\": 1}, {\"test2\": 3, \"test3\": 4}, {\"test3\": {\"test1\": [1,2,3]}}]}");
         Param params = new Param("params");
         params.add(obj);
-        Log.d("RBM", params.getJSON().toString());
         assertEquals("{\"test\":[{\"test2\":\"2\",\"test1\":\"1\"},{\"test2\":\"3\",\"test3\":\"4\"},{\"test3\":{\"test1\":[\"1\",\"2\",\"3\"]}}]}", params.getJSON().toString());
+    }
+
+    public void testArrayObjects3() throws JSONException {
+        JSONObject obj = new JSONObject("{\n" +
+                "  \"entries\": [\n" +
+                "    {\n" +
+                "      \"date\": 100000,\n" +
+                "      \"module\": \"sudoku\",\n" +
+                "      \"gametype\": \"duel\",\n" +
+                "      \"players\": [\n" +
+                "        {\n" +
+                "          \"uid\": 1,\n" +
+                "          \"oldelo\": 1000,\n" +
+                "          \"elo\": 1020,\n" +
+                "          \"pos\": 1\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"uid\": 2,\n" +
+                "          \"oldelo\": 1000,\n" +
+                "          \"elo\": 980,\n" +
+                "          \"pos\": 2\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"date\": 200000,\n" +
+                "      \"module\": \"sudoku\",\n" +
+                "      \"gametype\": \"duel\",\n" +
+                "      \"players\": [\n" +
+                "        {\n" +
+                "          \"uid\": 1,\n" +
+                "          \"oldelo\": 1020,\n" +
+                "          \"elo\": 1005,\n" +
+                "          \"pos\": 2\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"uid\": 2,\n" +
+                "          \"oldelo\": 980,\n" +
+                "          \"elo\": 995,\n" +
+                "          \"pos\": 1\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}");
+        Param params = new Param("params");
+        params.add(obj);
+        assertEquals("{\"entries\":[{\"date\":\"100000\",\"module\":\"sudoku\",\"gametype\":\"duel\",\"players\":[{\"uid\":\"1\",\"oldelo\":\"1000\",\"elo\":\"1020\",\"pos\":\"1\"},{\"uid\":\"2\",\"oldelo\":\"1000\",\"elo\":\"980\",\"pos\":\"2\"}]},{\"date\":\"200000\",\"module\":\"sudoku\",\"gametype\":\"duel\",\"players\":[{\"uid\":\"1\",\"oldelo\":\"1020\",\"elo\":\"1005\",\"pos\":\"2\"},{\"uid\":\"2\",\"oldelo\":\"980\",\"elo\":\"995\",\"pos\":\"1\"}]}]}", params.getJSON().toString());
     }
 }

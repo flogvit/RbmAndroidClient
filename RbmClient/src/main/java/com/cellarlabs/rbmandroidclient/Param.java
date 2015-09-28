@@ -326,79 +326,30 @@ public class Param implements Iterable<Param> {
         return null;
     }
 
-    public JSONObject getJSON(String key) {
-        JSONObject result = new JSONObject();
-        try {
-            for (Param param : children) {
-                if (param.isKeyValue()) {
-                    result.put(param.getKey(), param.getString());
-                } else if (param.isArray()) {
-                    JSONArray array = new JSONArray();
-                    Log.d("RBM", "Array "+param.getKey());
-                    for(Param num: param.children) {
-                        Log.d("RBM", "Num "+num.getKey());
-                        for (Param child : num.children) {
-                            array.put(child.getJSON(param.getKey()));
-/*                            if (child.isKeyValue()) {
-                                Log.d("RBM", "Is keyvalue "+child.getKey());
-                                JSONObject n = new JSONObject();
-                                n.put(child.getKey(), child.getString());
-                                array.put(n);
-                            } else if (child.isValue()) {
-                                Log.d("RBM", "Is value "+child.getKey());
-                                array.put(child.getKey());
-                            } else {
-                                Log.d("RBM", "Is object "+child.getKey());
-                                array.put(child.getJSON(child.getKey()));
-                            } */
-                        }
-                    }
-                    result.put(param.getKey(), array);
-                } else {
-                    JSONObject res = param.getJSON();
-                    result.put(param.getKey(), res);
-                }
-            }
-            if (key!=null) {
-                JSONObject t = new JSONObject();
-                t.put(key, result);
-                return t;
-            }
-            return result;
-        } catch(Exception e) {
-            Log.d("RBM", "Something went wrong");
-            return null;
-        }
-    }
-
     public void createJSON(JSONStringer str) {
         try {
-            Log.d("RBM", "Key: " + getKey());
+            if(LoggerConfig.ON) Log.d("RBM", "Key: " + getKey());
             if (isValue()) {
-                Log.d("RBM", "Is value "+getKey());
+                if(LoggerConfig.ON) Log.d("RBM", "Is value "+getKey());
                 str.value(getKey());
             } else if (isKeyValue()) {
-                Log.d("RBM", "Is keyvalue "+getKey());
+                if(LoggerConfig.ON) Log.d("RBM", "Is keyvalue "+getKey());
                 str.value(getString());
             } else if (isArray()) {
-                Log.d("RBM", "Is array " + getKey());
+                if(LoggerConfig.ON) Log.d("RBM", "Is array " + getKey());
                 str.array();
                 for (Param child2 : children) {
 //                    Param child = child2.children;
                     child2.createJSON(str);
                 }
                 str.endArray();
-                Log.d("RBM", "Finished array " + getKey());
+                if(LoggerConfig.ON) Log.d("RBM", "Finished array " + getKey());
             } else {
-                Log.d("RBM", "Is object "+getKey());
+                if(LoggerConfig.ON) Log.d("RBM", "Is object "+getKey());
                 str.object();
                 for (Param child : children) {
-//                    if (!child.isValue())
-                        str.key(child.getKey());
-//                    if (child.isArray())
-                    Log.d("RBM", "Adding key "+child.getKey());
-//                    str.key(child.getKey());
-                    Log.d("RBM", "Child " + child.getKey());
+                    str.key(child.getKey());
+                    if(LoggerConfig.ON) Log.d("RBM", "Adding key "+child.getKey());
                     if (child.isValue()) {
                         str.object();
                         str.endObject();
