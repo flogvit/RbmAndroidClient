@@ -183,5 +183,18 @@ public class ParamTest extends InstrumentationTestCase {
             datesum += entry.getInteger("date");
         }
         assertEquals(300000, datesum);
+
+        Param t = params.get("entries");
+        String t2 = t.getFullJSON().toString();
+        Log.d("RBM", t2);
+        Param t3 = new Param("params");
+        t3.addJSONString(t2);
+        assertEquals("{\"entries\":[{\"date\":\"100000\",\"module\":\"sudoku\",\"gametype\":\"duel\",\"players\":[{\"uid\":\"1\",\"oldelo\":\"1000\",\"elo\":\"1020\",\"pos\":\"1\"},{\"uid\":\"2\",\"oldelo\":\"1000\",\"elo\":\"980\",\"pos\":\"2\"}]},{\"date\":\"200000\",\"module\":\"sudoku\",\"gametype\":\"duel\",\"players\":[{\"uid\":\"1\",\"oldelo\":\"1020\",\"elo\":\"1005\",\"pos\":\"2\"},{\"uid\":\"2\",\"oldelo\":\"980\",\"elo\":\"995\",\"pos\":\"1\"}]}]}", t3.getJSON().toString());
+        datesum = 0;
+        entries = t3.get("entries");
+        for(Param entry: entries) {
+            datesum += entry.getInteger("date");
+        }
+        assertEquals(300000, datesum);
     }
 }

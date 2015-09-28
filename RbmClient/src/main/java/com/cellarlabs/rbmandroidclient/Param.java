@@ -154,6 +154,12 @@ public class Param implements Iterable<Param> {
         return this;
     }
 
+    public void addJSONString(String json) {
+        try{
+            add(new JSONObject(json));
+        } catch(Exception e) {}
+    }
+
     public String getKey() {
         return data;
     }
@@ -329,6 +335,18 @@ public class Param implements Iterable<Param> {
         JSONStringer str = new JSONStringer();
         try {
             createJSON(str);
+            return new JSONObject(str.toString());
+        } catch (Exception e) {}
+        return null;
+    }
+
+    public JSONObject getFullJSON() {
+        JSONStringer str = new JSONStringer();
+        try {
+            str.object();
+            str.key(getKey());
+            createJSON(str);
+            str.endObject();
             return new JSONObject(str.toString());
         } catch (Exception e) {}
         return null;
