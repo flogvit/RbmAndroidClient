@@ -176,5 +176,12 @@ public class ParamTest extends InstrumentationTestCase {
         Param params = new Param("params");
         params.add(obj);
         assertEquals("{\"entries\":[{\"date\":\"100000\",\"module\":\"sudoku\",\"gametype\":\"duel\",\"players\":[{\"uid\":\"1\",\"oldelo\":\"1000\",\"elo\":\"1020\",\"pos\":\"1\"},{\"uid\":\"2\",\"oldelo\":\"1000\",\"elo\":\"980\",\"pos\":\"2\"}]},{\"date\":\"200000\",\"module\":\"sudoku\",\"gametype\":\"duel\",\"players\":[{\"uid\":\"1\",\"oldelo\":\"1020\",\"elo\":\"1005\",\"pos\":\"2\"},{\"uid\":\"2\",\"oldelo\":\"980\",\"elo\":\"995\",\"pos\":\"1\"}]}]}", params.getJSON().toString());
+
+        Param entries = params.get("entries");
+        int datesum = 0;
+        for(Param entry: entries) {
+            datesum += entry.getInteger("date");
+        }
+        assertEquals(300000, datesum);
     }
 }

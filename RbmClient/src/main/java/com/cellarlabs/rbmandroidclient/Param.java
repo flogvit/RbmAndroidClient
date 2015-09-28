@@ -244,6 +244,14 @@ public class Param implements Iterable<Param> {
         return children;
     }
 
+    public ArrayList<Param> getArrayParam() {
+        ArrayList<Param> result = new ArrayList<>();
+        for(Param child: children) {
+            result.add(child.children.get(0));
+        }
+        return result;
+    }
+
     public ArrayList<String> getArrayString() {
         ArrayList<String> result = new ArrayList<>();
         for (Param child: children) {
