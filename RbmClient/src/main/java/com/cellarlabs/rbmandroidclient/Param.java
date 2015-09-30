@@ -334,7 +334,8 @@ public class Param implements Iterable<Param> {
     public JSONObject getJSON() {
         JSONStringer str = new JSONStringer();
         try {
-            createJSON(str);
+            if (children.size()>0)
+                createJSON(str);
             return new JSONObject(str.toString());
         } catch (Exception e) {}
         return null;
@@ -345,7 +346,8 @@ public class Param implements Iterable<Param> {
         try {
             str.object();
             str.key(getKey());
-            createJSON(str);
+            if (children.size()>0)
+                createJSON(str);
             str.endObject();
             return new JSONObject(str.toString());
         } catch (Exception e) {}
