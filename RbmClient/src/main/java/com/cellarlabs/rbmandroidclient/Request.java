@@ -22,6 +22,7 @@ public class Request {
     private int errorId = 0;
     private String errorText = "";
     private int count = 0;
+    private long now = -1;
     private double resendAfter = 0;
 
     public Request() {
@@ -38,6 +39,7 @@ public class Request {
                 params.add(json.getJSONObject("params"));
             this.errorId = json.has("error") ? json.getInt("error") : this.errorId;
             this.errorText = json.has("errorText") ? json.getString("errorText") : this.errorText;
+            this.now = json.has("now") ? json.getLong("now") : -1;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -176,76 +178,6 @@ public class Request {
         return this.errorText;
     }
 
-/*    protected void buildParams(JSONObject obj) {
-        JSONObject jsonparams = new JSONObject();
-        JSONArray populate = null;
-
-        try {
-            for (Param param : this.params) {
-                if (param.isRequest()) {
-                    JSONObject entry = new JSONObject();
-                    entry.put("request", param.getRequest().dataCore());
-                    entry.put("returns", param.getMap());
-                    if (populate == null)
-                        populate = new JSONArray();
-                    populate.put(entry);
-                } else {
-                    if (param.isValueArray())
-                        jsonparams.put(param.getKey(), param.getValueArray());
-                    else if (param.isValueObject())
-                        jsonparams.put(param.getKey(), param.getValueObject());
-                    else
-                        jsonparams.put(param.getKey(), param.getValue());
-                }
-            }
-            if (populate != null)
-                obj.put("populate", populate);
-            obj.put("params", jsonparams);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-*/
-
-    /**
-     * Parse the incoming params
-     * <p/>
-     * TODO: Need to implement arrays etc later on
-     *
-     * @param
-     */
-/*    protected void parseParams(JSONObject obj) {
-        this.params = new ArrayList<>();
-        Iterator<?> keys = obj.keys();
-
-        while (keys.hasNext()) {
-            String key = (String) keys.next();
-
-            Param param;
-
-            try {
-                String data = obj.getString(key);
-
-                if(data == null || data.length() == 0){
-                    param = new Param().set(key, data);
-                }else {
-                    Object json = new JSONTokener(data).nextValue();
-                    if (json instanceof JSONObject) {
-                        param = new Param().set(key, (JSONObject) json);
-                    } else if (json instanceof JSONArray) {
-                        param = new Param().set(key, (JSONArray) json);
-                    } else {
-                        param = new Param().set(key, data);
-                    }
-                }
-                params.add(param);
-            } catch (JSONException e) {
-                Log.e("RBM", "Error parsing key " + key);
-                e.printStackTrace();
-            }
-        }
-    }
-*/
     public void setCount(int count) {
         this.count = count;
     }
@@ -260,5 +192,9 @@ public class Request {
 
     public double getResendAfter() {
         return this.resendAfter;
+    }
+
+    public long getNow() {
+        return this.now;
     }
 }
